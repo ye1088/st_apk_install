@@ -21,9 +21,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Intent intent = new Intent(MainActivity.this,JiaoCheng.class);
-		
-		startActivity(intent);
     }
 
 
@@ -34,7 +31,9 @@ public class MainActivity extends Activity {
 		boolean jiaocheng = settings.getBoolean("jiaocheng", true);
 		Log.i("info", "½Ì³Ì£º"+jiaocheng);
 		if (jiaocheng){
+			
 			show_jiaocheng();
+			
 		}else{
 			show_apk_list();
 		}
@@ -58,7 +57,7 @@ private void show_jiaocheng() {
 		@Override
 		public void onClick(DialogInterface arg0, int arg1) {
 			// TODO Auto-generated method stub
-			
+			show_apk_list();
 			Intent intent = new Intent(MainActivity.this,JiaoCheng.class);
 			
 			startActivity(intent);

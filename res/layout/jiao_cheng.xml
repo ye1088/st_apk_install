@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <ScrollView 
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+	<LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:orientation="vertical"
+	    >
+	    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="	看完教程后，将跳掉下面这个页面中" />
+	<ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/jiaocheng_0" />
+	 <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="	找到要清除数据的游戏或软件，并点进去,；然后滑到下面，会发现有个“清除数据”按钮，不同的手机可能有点不一样，不过都大同小异~" />
+	 
+	 <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/jiaocheng_1" />
+	 <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="	点击清除按钮，会提示是否要清除数据，我们直接点“确定”就完成操作了~~" />
+	 <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/jiaocheng_2" />
+	 
+	 <Button 
+	     android:id="@+id/finish"
+	     android:layout_width="match_parent"
+	     android:layout_height="wrap_content"
+	     android:onClick="finish"
+	     android:text="我悟了！~"
+	     />
+	    
+	</LinearLayout>
+	</ScrollView>
+</LinearLayout>

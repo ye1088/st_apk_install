@@ -65,6 +65,13 @@ public class Utils {
         }
     }
     
+    public void makeDirs(String path){
+    	File file = new File(path);
+    	if (!file.exists()){
+    		file.mkdirs();
+    	}
+    }
+    
     
     //获取apk的包名
     public String getApkPackageName(String apkPath,Context context){

@@ -7,11 +7,12 @@
     android:orientation="vertical" >
     <ScrollView 
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         >
 	<LinearLayout 
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
+	    android:gravity="top"
 	    android:orientation="vertical"
 	    >
 	    <TextView
@@ -22,10 +23,11 @@
         android:text="	看完教程后，将跳掉下面这个页面中" />
 	    
 	<ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/jiaocheng_0" />
+	    android:id="@+id/imageView1"
+	    android:layout_width="wrap_content"
+	    android:layout_height="450sp"
+	    android:src="@drawable/jiaocheng_0" />
+
 	 <TextView
         android:id="@+id/textView2"
         android:layout_width="match_parent"
@@ -36,7 +38,7 @@
 	 <ImageView
         android:id="@+id/imageView2"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="450sp"
         android:src="@drawable/jiaocheng_1" />
 	 <TextView
         android:id="@+id/textView3"
@@ -47,7 +49,7 @@
 	 <ImageView
         android:id="@+id/imageView3"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="450sp"
         android:src="@drawable/jiaocheng_2" />
 	 
 	 <Button 

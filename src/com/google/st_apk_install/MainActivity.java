@@ -12,6 +12,8 @@ import java.util.zip.ZipException;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -32,7 +34,9 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -43,6 +47,26 @@ public class MainActivity extends Activity {
 	Map apkMap ;
 	ApkAdapter adapter;
 	Utils util ;
+	ProgressBar delay_bar;
+	
+	Handler handler = new Handler(){
+		public void handleMessage(Message msg) {
+
+			switch (msg.arg1) {
+			case 100:
+				delay_bar.setVisibility(View.INVISIBLE);
+				//将文件的修改时间按从大到小的顺序排列
+				Collections.sort(modTime,new MyLongCompare());
+				adapter = new ApkAdapter(MainActivity.this,modTime,apkMap);
+				apkList.setAdapter(adapter);
+				break;
+
+			default:
+				break;
+			}
+			
+		};
+	};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,28 +94,89 @@ public class MainActivity extends Activity {
 		});
     }
     
+
+ //启动时初始化各项配置  
+    @Override
+    protected void onStart() {
+    	// TODO Auto-generated method stub
+    	super.onStart();
+    	delay_bar = (ProgressBar) findViewById(R.id.delay);
+    	SharedPreferences settings = getSharedPreferences("Config.xml", MODE_PRIVATE);
+    	boolean isfirst = settings.getBoolean("isFirst", true);
+    	if (isfirst){
+    		init();
+    		Editor edit = settings.edit();
+    		edit.putBoolean("isFirst", false);
+    		edit.commit();
+    	}
+    	
+    }
     
     
-    //xapk和xpk的安装
+    
+    private void init() {
+		// TODO Auto-generated method stub
+    	
+		util.makeDirs("/sdcard/st_unZip");
+		util.makeDirs("/sdcard/Android/obb");
+		
+	}
+
+//各个按钮的点击事件
+public void btclick(View v){
+	   switch (v.getId()) {
+	case R.id.apklist:
+		SharedPreferences settings = getSharedPreferences("Config.xml", MODE_PRIVATE);
+		boolean jiaocheng = settings.getBoolean("jiaocheng", true);
+		Log.i("info", "教程："+jiaocheng);
+		if (jiaocheng){
+			
+			show_jiaocheng();
+			
+		}else{
+			show_apkInfo_list();
+		}
+		
+		break;
+		
+	case R.id.refresh:
+		delay_bar.setVisibility(View.VISIBLE);
+		show_apklist();
+		break;
+
+	default:
+		break;
+	}
+	   
+   }
+
+
+	//xapk和xpk的安装
     private void xapk_install(String apkPath){
     	try {
-			String unZipDir = String.valueOf(new Date());
+			String unZipDir = String.valueOf((new File(apkPath)).lastModified());
 			util.upZipFile(new File(apkPath), "/sdcard/st_unZip/"+unZipDir);
 			File uZipDir = new File("/sdcard/st_unZip/"+unZipDir);
 			File[] listFiles = uZipDir.listFiles();
 			String apkPackage = "";
-			for (File file : listFiles) {
-				if ((file.getName()).endsWith(".apk")){
-					util.install_apk(file.getAbsolutePath(),MainActivity.this);
-					apkPackage = util.getApkPackageName(file.getAbsolutePath(), this);
+			String apkPath_obb = "";
+			if (listFiles!=null){
+				for (File file : listFiles) {
+					if ((file.getName()).endsWith(".apk")){
+						apkPath_obb = file.getAbsolutePath();
+						
+						apkPackage = util.getApkPackageName(file.getAbsolutePath(), this);
+					}
 				}
 			}
+			
 			File obb_dir_exist = new File("/sdcard/Android/obb/"+apkPackage);
 			if (!(obb_dir_exist.exists())){
 				obb_dir_exist.mkdirs();
 			}
 			
 			copyObb(uZipDir.getAbsolutePath(),obb_dir_exist.getAbsolutePath());
+			util.install_apk(apkPath_obb,MainActivity.this);
 			
 			
 		} catch (ZipException e) {
@@ -105,16 +190,24 @@ public class MainActivity extends Activity {
     
    
 
-   private void copyObb(String srcPath, String dstPath) {
+   private void copyObb(String srcPath, final String dstPath) {
 		// TODO Auto-generated method stub
 	   File dirs = new File(srcPath);
 	   File[] listFiles = dirs.listFiles();
-	   for (File file : listFiles) {
+	   for (final File file : listFiles) {
 		   if (file.isDirectory()){
 			   copyObb(file.getAbsolutePath(), dstPath);
 		   }
+//		   Log.i("obb_file", "找到一个obb"+file.getAbsolutePath());
 		   if ((file.getName()).endsWith(".obb")){
-			   util.copyFile(file.getAbsolutePath(), dstPath);
+			   new Thread(){
+				   @Override
+				public void run() {
+					// TODO Auto-generated method stub
+					   util.copyFile(file.getAbsolutePath(), dstPath+File.separator+file.getName());
+				}
+			   }.start();
+			   
 		   }
 			
 		}
@@ -127,32 +220,45 @@ private void show_apklist() {
 		apkList = (ListView) findViewById(R.id.apklistbview);
 		apkMap = new HashMap();
 		modTime = new ArrayList<Long>();
-		list_file("/sdcard");
-		//将文件的修改时间按从大到小的顺序排列
-		Collections.sort(modTime,new MyLongCompare());
-		adapter = new ApkAdapter(this,modTime,apkMap);
-		apkList.setAdapter(adapter);
+		new Thread(){
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				list_file("/sdcard");
+				Message msg = handler.obtainMessage();
+				msg.arg1 = 100;
+				handler.sendMessage(msg);
+			}
+		}.start();
 		
 	}
+
+
 
 //遍历文件夹 找出安装包
 private void list_file(String path) {
 	// TODO Auto-generated method stub
 	File dir = new File(path);
-	File[] listFiles = dir.listFiles();
-	for (File file : listFiles) {
-		if (file.isDirectory()){
-			list_file(file.getAbsolutePath());
-		}else{
-			//判断文件是不是我们需要的东东
-			if(file.getName().endsWith(".apk")){
-				getApkInfo(file);
-			}else if (file.getName().endsWith(".xapk")||file.getName().endsWith(".dpk")
-					||file.getName().endsWith(".xpk")){
-				getZipIndo(file);
+	if (dir.exists()){
+		File[] listFiles = dir.listFiles();
+		if (listFiles!=null){
+			for (File file : listFiles) {
+				if (file.isDirectory()){
+					list_file(file.getAbsolutePath());
+				}else{
+					//判断文件是不是我们需要的东东
+					if(file.getName().endsWith(".apk")){
+						getApkInfo(file);
+					}else if (file.getName().endsWith(".xapk")||file.getName().endsWith(".dpk")
+							||file.getName().endsWith(".xpk")){
+						getZipIndo(file);
+					}
+				}
 			}
 		}
+		
 	}
+	
 }
 
 
@@ -189,29 +295,6 @@ private void getApkInfo(File file) {
 }
 
 
-public void btclick(View v){
-	   switch (v.getId()) {
-	case R.id.apklist:
-		SharedPreferences settings = getSharedPreferences("Config.xml", MODE_PRIVATE);
-		boolean jiaocheng = settings.getBoolean("jiaocheng", true);
-		Log.i("info", "教程："+jiaocheng);
-		if (jiaocheng){
-			
-			show_jiaocheng();
-			
-		}else{
-			show_apk_list();
-		}
-		
-		break;
-
-	default:
-		break;
-	}
-	   
-   }
-
-
 private void show_jiaocheng() {
 	// TODO Auto-generated method stub
 	Builder dialog = new AlertDialog.Builder(this);
@@ -222,7 +305,7 @@ private void show_jiaocheng() {
 		@Override
 		public void onClick(DialogInterface arg0, int arg1) {
 			// TODO Auto-generated method stub
-			show_apk_list();
+			show_apkInfo_list();
 			Intent intent = new Intent(MainActivity.this,JiaoCheng.class);
 			
 			startActivity(intent);
@@ -233,7 +316,7 @@ private void show_jiaocheng() {
 		@Override
 		public void onClick(DialogInterface arg0, int arg1) {
 			// TODO Auto-generated method stub
-			show_apk_list();
+			show_apkInfo_list();
 		}
 	});
 	dialog.setNegativeButton("不要再出现", new OnClickListener() {
@@ -250,13 +333,13 @@ private void show_jiaocheng() {
 				edit.commit();
 			}
 			
-			show_apk_list();
+			show_apkInfo_list();
 		}
 	});
 	dialog.create().show();
 }
 
-public void show_apk_list(){
+public void show_apkInfo_list(){
 
 	Intent intent = new Intent();
 	ComponentName comp = new ComponentName("com.android.settings",

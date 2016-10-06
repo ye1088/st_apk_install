@@ -20,7 +20,7 @@ public class JiaoCheng extends Activity {
 	private void finish(View v){
 		switch (v.getId()) {
 		case R.id.finish:
-			finish();
+			this.finish();
 			
 			
 			break;

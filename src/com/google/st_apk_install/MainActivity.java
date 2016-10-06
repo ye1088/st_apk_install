@@ -24,6 +24,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -31,6 +33,7 @@ public class MainActivity extends Activity {
 	ListView apkList ;
 	ArrayList modTime;
 	ApkInfo apkInfo;
+	//根据modTime中的文件最后修改的时间戳 来获取对应 的apk信息
 	Map apkMap ;
 	ApkAdapter adapter;
 
@@ -40,8 +43,30 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         //将手机内存中的所有apk等显示出来
         show_apklist();
+        apkList.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int pos,
+					long arg3) {
+				// TODO Auto-generated method stub
+				String apk_name = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apk_name;
+				String apkPath = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apkPath;
+				if (apkPath.endsWith(".apk")){
+					install_apk(apkPath);
+				}
+			}
+
+			
+		});
     }
 
+    private void install_apk(String apkPath) {
+		// TODO Auto-generated method stub
+    	
+    	new Intent(Intent);
+		
+	}
+   
 
    private void show_apklist() {
 		// TODO Auto-generated method stub
@@ -80,12 +105,20 @@ private void getApkInfo(File file) {
 	Log.i("info", file.getAbsolutePath());
 	PackageManager pm = getPackageManager();
 	PackageInfo pi = pm.getPackageArchiveInfo(file.getAbsolutePath(), 0);
-	ApplicationInfo applicationInfo = pi.applicationInfo;
-	applicationInfo.sourceDir = file.getAbsolutePath();
-	applicationInfo.publicSourceDir = file.getAbsolutePath();
-	apkInfo = new ApkInfo((BitmapDrawable)pm.getApplicationIcon(applicationInfo), (String)pm.getApplicationLabel(applicationInfo), applicationInfo.packageName, file.lastModified());
-	apkMap.put(String.valueOf(file.lastModified()), apkInfo);
-	modTime.add(file.lastModified());
+	try {
+		ApplicationInfo applicationInfo = pi.applicationInfo;
+		applicationInfo.sourceDir = file.getAbsolutePath();
+		applicationInfo.publicSourceDir = file.getAbsolutePath();
+		apkInfo = new ApkInfo((BitmapDrawable)pm.getApplicationIcon(applicationInfo), (String)pm.getApplicationLabel(applicationInfo), applicationInfo.packageName,
+				file.lastModified(),file.getAbsolutePath());
+		apkMap.put(String.valueOf(file.lastModified()), apkInfo);
+		modTime.add(file.lastModified());
+	} catch (Exception e) {
+		// TODO: handle exception
+//		Toast.makeText(this, file.getAbsolutePath()+" is bad file!.", Toast.LENGTH_LONG).show();
+		Log.d("badApk", file.getAbsolutePath()+" is bad file!.");
+	}
+	
 }
 
 

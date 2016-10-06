@@ -9,13 +9,14 @@ public class ApkInfo {
 	String apk_name;
 	String pack_name;
 	long time;
+	String apkPath;
 	
-	public ApkInfo(BitmapDrawable icon,String apk_name,String pack_name,long time){
+	public ApkInfo(BitmapDrawable icon,String apk_name,String pack_name,long time,String apkPath){
 		this.icon = icon.getBitmap();
 		this.apk_name = apk_name;
 		this.pack_name = pack_name;
 		this.time = time;
-				
+		this.apkPath = apkPath;		
 	}
 	
 

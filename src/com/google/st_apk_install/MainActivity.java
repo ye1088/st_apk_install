@@ -1,12 +1,16 @@
 package com.google.st_apk_install;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipException;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -20,6 +24,8 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.view.Menu;
@@ -36,11 +42,13 @@ public class MainActivity extends Activity {
 	//根据modTime中的文件最后修改的时间戳 来获取对应 的apk信息
 	Map apkMap ;
 	ApkAdapter adapter;
+	Utils util ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        util = new Utils();
         //将手机内存中的所有apk等显示出来
         show_apklist();
         apkList.setOnItemClickListener(new OnItemClickListener() {
@@ -52,23 +60,69 @@ public class MainActivity extends Activity {
 				String apk_name = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apk_name;
 				String apkPath = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apkPath;
 				if (apkPath.endsWith(".apk")){
-					install_apk(apkPath);
+					util.install_apk(apkPath,MainActivity.this);
+				}else if(apkPath.endsWith(".xapk")||apkPath.endsWith(".xpk")||apkPath.endsWith(".dpk")){
+					xapk_install(apkPath);
 				}
 			}
 
 			
 		});
     }
-
-    private void install_apk(String apkPath) {
-		// TODO Auto-generated method stub
-    	
-    	new Intent(Intent);
-		
-	}
+    
+    
+    
+    //xapk和xpk的安装
+    private void xapk_install(String apkPath){
+    	try {
+			String unZipDir = String.valueOf(new Date());
+			util.upZipFile(new File(apkPath), "/sdcard/st_unZip/"+unZipDir);
+			File uZipDir = new File("/sdcard/st_unZip/"+unZipDir);
+			File[] listFiles = uZipDir.listFiles();
+			String apkPackage = "";
+			for (File file : listFiles) {
+				if ((file.getName()).endsWith(".apk")){
+					util.install_apk(file.getAbsolutePath(),MainActivity.this);
+					apkPackage = util.getApkPackageName(file.getAbsolutePath(), this);
+				}
+			}
+			File obb_dir_exist = new File("/sdcard/Android/obb/"+apkPackage);
+			if (!(obb_dir_exist.exists())){
+				obb_dir_exist.mkdirs();
+			}
+			
+			copyObb(uZipDir.getAbsolutePath(),obb_dir_exist.getAbsolutePath());
+			
+			
+		} catch (ZipException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
    
 
-   private void show_apklist() {
+   private void copyObb(String srcPath, String dstPath) {
+		// TODO Auto-generated method stub
+	   File dirs = new File(srcPath);
+	   File[] listFiles = dirs.listFiles();
+	   for (File file : listFiles) {
+		   if (file.isDirectory()){
+			   copyObb(file.getAbsolutePath(), dstPath);
+		   }
+		   if ((file.getName()).endsWith(".obb")){
+			   util.copyFile(file.getAbsolutePath(), dstPath);
+		   }
+			
+		}
+	}
+
+
+
+private void show_apklist() {
 		// TODO Auto-generated method stub
 		apkList = (ListView) findViewById(R.id.apklistbview);
 		apkMap = new HashMap();
@@ -91,14 +145,27 @@ private void list_file(String path) {
 			list_file(file.getAbsolutePath());
 		}else{
 			//判断文件是不是我们需要的东东
-			if(file.getName().endsWith(".apk")||file.getName().endsWith(".xapk")||file.getName().endsWith(".dpk")
-					||file.getName().endsWith(".xpk")){
+			if(file.getName().endsWith(".apk")){
 				getApkInfo(file);
+			}else if (file.getName().endsWith(".xapk")||file.getName().endsWith(".dpk")
+					||file.getName().endsWith(".xpk")){
+				getZipIndo(file);
 			}
 		}
 	}
 }
 
+
+private void getZipIndo(File file) {
+	// TODO Auto-generated method stub
+//	Log.i("info", "执行了么1");
+	Bitmap bmp=BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_launcher);
+//	Log.i("info", "执行了么2");
+	apkInfo = new ApkInfo(bmp, file.getName().toString(), "Unknow",
+			file.lastModified(),file.getAbsolutePath());
+	apkMap.put(String.valueOf(file.lastModified()), apkInfo);
+	modTime.add(file.lastModified());
+}
 
 private void getApkInfo(File file) {
 	// TODO Auto-generated method stub

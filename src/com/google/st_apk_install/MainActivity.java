@@ -2,6 +2,8 @@ package com.google.st_apk_install;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,12 +32,13 @@ public class MainActivity extends Activity {
 	ArrayList modTime;
 	ApkInfo apkInfo;
 	Map apkMap ;
+	ApkAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
+        //将手机内存中的所有apk等显示出来
         show_apklist();
     }
 
@@ -46,6 +49,10 @@ public class MainActivity extends Activity {
 		apkMap = new HashMap();
 		modTime = new ArrayList<Long>();
 		list_file("/sdcard");
+		//将文件的修改时间按从大到小的顺序排列
+		Collections.sort(modTime,new MyLongCompare());
+		adapter = new ApkAdapter(this,modTime,apkMap);
+		apkList.setAdapter(adapter);
 		
 	}
 
@@ -70,13 +77,13 @@ private void list_file(String path) {
 
 private void getApkInfo(File file) {
 	// TODO Auto-generated method stub
+	Log.i("info", file.getAbsolutePath());
 	PackageManager pm = getPackageManager();
 	PackageInfo pi = pm.getPackageArchiveInfo(file.getAbsolutePath(), 0);
 	ApplicationInfo applicationInfo = pi.applicationInfo;
 	applicationInfo.sourceDir = file.getAbsolutePath();
 	applicationInfo.publicSourceDir = file.getAbsolutePath();
-	
-	apkInfo = new ApkInfo((BitmapDrawable)pm.getApplicationIcon(applicationInfo), applicationInfo.name, applicationInfo.packageName, file.lastModified());
+	apkInfo = new ApkInfo((BitmapDrawable)pm.getApplicationIcon(applicationInfo), (String)pm.getApplicationLabel(applicationInfo), applicationInfo.packageName, file.lastModified());
 	apkMap.put(String.valueOf(file.lastModified()), apkInfo);
 	modTime.add(file.lastModified());
 }

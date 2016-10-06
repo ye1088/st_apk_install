@@ -2,6 +2,8 @@ package com.google.st_apk_install;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -13,6 +15,10 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -21,13 +27,15 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	ListView apkList ;
-	ArrayList info_list;
+	ArrayList modTime;
 	ApkInfo apkInfo;
+	Map apkMap ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
         show_apklist();
     }
 
@@ -35,7 +43,8 @@ public class MainActivity extends Activity {
    private void show_apklist() {
 		// TODO Auto-generated method stub
 		apkList = (ListView) findViewById(R.id.apklistbview);
-		info_list = new ArrayList<ApkInfo>();
+		apkMap = new HashMap();
+		modTime = new ArrayList<Long>();
 		list_file("/sdcard");
 		
 	}
@@ -52,10 +61,24 @@ private void list_file(String path) {
 			//判断文件是不是我们需要的东东
 			if(file.getName().endsWith(".apk")||file.getName().endsWith(".xapk")||file.getName().endsWith(".dpk")
 					||file.getName().endsWith(".xpk")){
-				
+				getApkInfo(file);
 			}
 		}
 	}
+}
+
+
+private void getApkInfo(File file) {
+	// TODO Auto-generated method stub
+	PackageManager pm = getPackageManager();
+	PackageInfo pi = pm.getPackageArchiveInfo(file.getAbsolutePath(), 0);
+	ApplicationInfo applicationInfo = pi.applicationInfo;
+	applicationInfo.sourceDir = file.getAbsolutePath();
+	applicationInfo.publicSourceDir = file.getAbsolutePath();
+	
+	apkInfo = new ApkInfo((BitmapDrawable)pm.getApplicationIcon(applicationInfo), applicationInfo.name, applicationInfo.packageName, file.lastModified());
+	apkMap.put(String.valueOf(file.lastModified()), apkInfo);
+	modTime.add(file.lastModified());
 }
 
 

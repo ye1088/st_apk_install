@@ -5,6 +5,10 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 public class ApkAdapter extends BaseAdapter{
+	
+	public ApkAdapter(){
+		
+	}
 
 	@Override
 	public int getCount() {

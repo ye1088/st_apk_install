@@ -1,5 +1,8 @@
 package com.google.st_apk_install;
 
+import java.io.File;
+import java.util.ArrayList;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -13,18 +16,50 @@ import android.content.SharedPreferences.Editor;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
+	ListView apkList ;
+	ArrayList info_list;
+	ApkInfo apkInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        show_apklist();
     }
 
 
-   public void btclick(View v){
+   private void show_apklist() {
+		// TODO Auto-generated method stub
+		apkList = (ListView) findViewById(R.id.apklistbview);
+		info_list = new ArrayList<ApkInfo>();
+		list_file("/sdcard");
+		
+	}
+
+//遍历文件夹 找出安装包
+private void list_file(String path) {
+	// TODO Auto-generated method stub
+	File dir = new File(path);
+	File[] listFiles = dir.listFiles();
+	for (File file : listFiles) {
+		if (file.isDirectory()){
+			list_file(file.getAbsolutePath());
+		}else{
+			//判断文件是不是我们需要的东东
+			if(file.getName().endsWith(".apk")||file.getName().endsWith(".xapk")||file.getName().endsWith(".dpk")
+					||file.getName().endsWith(".xpk")){
+				
+			}
+		}
+	}
+}
+
+
+public void btclick(View v){
 	   switch (v.getId()) {
 	case R.id.apklist:
 		SharedPreferences settings = getSharedPreferences("Config.xml", MODE_PRIVATE);

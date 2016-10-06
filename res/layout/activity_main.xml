@@ -12,19 +12,54 @@
         android:id="@+id/install"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/apklist"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:onClick="btclick"
-        android:text="安装" />
+        android:text="刷新应用列表" />
 
     <Button
         android:id="@+id/apklist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/install"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
         android:onClick="btclick"
         android:text="应用清数据" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/apklist"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/apklist"
+        android:orientation="vertical" >
+        <TextView
+            android:text="应用列表：（选择要安装的应用）"
+            android:textSize="20sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+        <ScrollView
+            android:id="@+id/scrollView1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+                <ListView 
+                    android:id="@+id/apklistbview"
+                    android:layout_width="match_parent"
+                	android:layout_height="match_parent"
+                    >
+                    
+                </ListView>
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
 
 </RelativeLayout>

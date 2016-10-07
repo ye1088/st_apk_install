@@ -27,7 +27,7 @@ public final class R {
         public static final int jiaocheng_2=0x7f020003;
     }
     public static final class id {
-        public static final int action_settings=0x7f08000e;
+        public static final int action_settings=0x7f08000f;
         public static final int apklist=0x7f080001;
         public static final int apklistbview=0x7f080003;
         public static final int apkname=0x7f080006;
@@ -39,6 +39,7 @@ public final class R {
         public static final int imageView3=0x7f08000c;
         public static final int packname=0x7f080005;
         public static final int refresh=0x7f080000;
+        public static final int sdcard_install=0x7f08000e;
         public static final int textView1=0x7f080007;
         public static final int textView2=0x7f080009;
         public static final int textView3=0x7f08000b;
@@ -47,7 +48,8 @@ public final class R {
         public static final int activity_main=0x7f030000;
         public static final int apk_info=0x7f030001;
         public static final int jiao_cheng=0x7f030002;
-        public static final int test=0x7f030003;
+        public static final int sdcard_install=0x7f030003;
+        public static final int test=0x7f030004;
     }
     public static final class menu {
         public static final int main=0x7f070000;

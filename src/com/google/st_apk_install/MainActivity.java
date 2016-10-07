@@ -89,11 +89,17 @@ public class MainActivity extends Activity {
 				// TODO Auto-generated method stub
 				Log.i("List_Length", pos+" "+modTime.size());
 				String apk_name = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apk_name;
-				String apkPath = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apkPath;
+				final String apkPath = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apkPath;
 				if (apkPath.endsWith(".apk")){
 					util.install_apk(apkPath,MainActivity.this);
 				}else if(apkPath.endsWith(".xapk")||apkPath.endsWith(".xpk")||apkPath.endsWith(".dpk")){
-					xapk_install(apkPath,MainActivity.this);
+					new Thread(){
+						public void run() {
+							xapk_install(apkPath,MainActivity.this);
+							
+						};
+					}.start();
+					
 				}
 			}
 
@@ -161,7 +167,7 @@ public void btclick(View v){
 	//xapk和xpk的安装
     public static void xapk_install(String apkPath,Context context){
     	try {
-			String unZipDir = String.valueOf((new File(apkPath)).lastModified());
+			String unZipDir = String.valueOf((new File(apkPath)).lastModified()+1);
 			util.upZipFile(new File(apkPath), "/sdcard/st_unZip/"+unZipDir);
 			File uZipDir = new File("/sdcard/st_unZip/"+unZipDir);
 			File[] listFiles = uZipDir.listFiles();
@@ -182,7 +188,7 @@ public void btclick(View v){
 				obb_dir_exist.mkdirs();
 			}
 			
-			copyObb(uZipDir.getAbsolutePath(),obb_dir_exist.getAbsolutePath());
+			util.copyObb(uZipDir.getAbsolutePath(),obb_dir_exist.getAbsolutePath());
 			util.install_apk(apkPath_obb,context);
 			
 			
@@ -196,31 +202,6 @@ public void btclick(View v){
     }
     
    
-
-   private static void copyObb(final String srcPath, final String dstPath) {
-		// TODO Auto-generated method stub
-	   new Thread(){
-		   @Override
-		public void run() {
-		   File dirs = new File(srcPath);
-		   File[] listFiles = dirs.listFiles();
-		   for (final File file : listFiles) {
-			   if (file.isDirectory()){
-				   copyObb(file.getAbsolutePath(), dstPath);
-			   }
-	//		   Log.i("obb_file", "找到一个obb"+file.getAbsolutePath());
-			   if ((file.getName()).endsWith(".obb")){
-				   
-						// TODO Auto-generated method stub
-						   util.copyFile(file.getAbsolutePath(), dstPath+File.separator+file.getName());
-					}
-				   
-				   
-			   }
-			
-		}
-	   }.start();
-	}
 
 
 

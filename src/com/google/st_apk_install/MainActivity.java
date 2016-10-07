@@ -18,6 +18,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
@@ -46,7 +48,7 @@ public class MainActivity extends Activity {
 	//根据modTime中的文件最后修改的时间戳 来获取对应 的apk信息
 	Map apkMap ;
 	ApkAdapter adapter;
-	Utils util ;
+	static Utils util ;
 	ProgressBar delay_bar;
 	
 	Handler handler = new Handler(){
@@ -72,6 +74,10 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+//        Intent intent = getIntent();
+//        Uri data = intent.getData();
+//        Log.i("uri", data.toString().substring(7));
         util = new Utils();
         //将手机内存中的所有apk等显示出来
         show_apklist();
@@ -81,12 +87,13 @@ public class MainActivity extends Activity {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int pos,
 					long arg3) {
 				// TODO Auto-generated method stub
+				Log.i("List_Length", pos+" "+modTime.size());
 				String apk_name = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apk_name;
 				String apkPath = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apkPath;
 				if (apkPath.endsWith(".apk")){
 					util.install_apk(apkPath,MainActivity.this);
 				}else if(apkPath.endsWith(".xapk")||apkPath.endsWith(".xpk")||apkPath.endsWith(".dpk")){
-					xapk_install(apkPath);
+					xapk_install(apkPath,MainActivity.this);
 				}
 			}
 
@@ -152,7 +159,7 @@ public void btclick(View v){
 
 
 	//xapk和xpk的安装
-    private void xapk_install(String apkPath){
+    public static void xapk_install(String apkPath,Context context){
     	try {
 			String unZipDir = String.valueOf((new File(apkPath)).lastModified());
 			util.upZipFile(new File(apkPath), "/sdcard/st_unZip/"+unZipDir);
@@ -165,7 +172,7 @@ public void btclick(View v){
 					if ((file.getName()).endsWith(".apk")){
 						apkPath_obb = file.getAbsolutePath();
 						
-						apkPackage = util.getApkPackageName(file.getAbsolutePath(), this);
+						apkPackage = util.getApkPackageName(file.getAbsolutePath(), context);
 					}
 				}
 			}
@@ -176,7 +183,7 @@ public void btclick(View v){
 			}
 			
 			copyObb(uZipDir.getAbsolutePath(),obb_dir_exist.getAbsolutePath());
-			util.install_apk(apkPath_obb,MainActivity.this);
+			util.install_apk(apkPath_obb,context);
 			
 			
 		} catch (ZipException e) {
@@ -190,27 +197,29 @@ public void btclick(View v){
     
    
 
-   private void copyObb(String srcPath, final String dstPath) {
+   private static void copyObb(final String srcPath, final String dstPath) {
 		// TODO Auto-generated method stub
-	   File dirs = new File(srcPath);
-	   File[] listFiles = dirs.listFiles();
-	   for (final File file : listFiles) {
-		   if (file.isDirectory()){
-			   copyObb(file.getAbsolutePath(), dstPath);
-		   }
-//		   Log.i("obb_file", "找到一个obb"+file.getAbsolutePath());
-		   if ((file.getName()).endsWith(".obb")){
-			   new Thread(){
-				   @Override
-				public void run() {
-					// TODO Auto-generated method stub
-					   util.copyFile(file.getAbsolutePath(), dstPath+File.separator+file.getName());
-				}
-			   }.start();
-			   
-		   }
+	   new Thread(){
+		   @Override
+		public void run() {
+		   File dirs = new File(srcPath);
+		   File[] listFiles = dirs.listFiles();
+		   for (final File file : listFiles) {
+			   if (file.isDirectory()){
+				   copyObb(file.getAbsolutePath(), dstPath);
+			   }
+	//		   Log.i("obb_file", "找到一个obb"+file.getAbsolutePath());
+			   if ((file.getName()).endsWith(".obb")){
+				   
+						// TODO Auto-generated method stub
+						   util.copyFile(file.getAbsolutePath(), dstPath+File.separator+file.getName());
+					}
+				   
+				   
+			   }
 			
 		}
+	   }.start();
 	}
 
 
@@ -265,12 +274,14 @@ private void list_file(String path) {
 private void getZipIndo(File file) {
 	// TODO Auto-generated method stub
 //	Log.i("info", "执行了么1");
-	Bitmap bmp=BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_launcher);
-//	Log.i("info", "执行了么2");
-	apkInfo = new ApkInfo(bmp, file.getName().toString(), "Unknow",
-			file.lastModified(),file.getAbsolutePath());
-	apkMap.put(String.valueOf(file.lastModified()), apkInfo);
-	modTime.add(file.lastModified());
+	if (apkMap.get(String.valueOf(file.lastModified()))==null){
+		Bitmap bmp=BitmapFactory.decodeResource(this.getResources(), R.drawable.ic_launcher);
+	//	Log.i("info", "执行了么2");
+		apkInfo = new ApkInfo(bmp, file.getName().toString(), "Unknow",
+				file.lastModified(),file.getAbsolutePath());
+		apkMap.put(String.valueOf(file.lastModified()), apkInfo);
+		modTime.add(file.lastModified());
+	}
 }
 
 private void getApkInfo(File file) {
@@ -279,13 +290,16 @@ private void getApkInfo(File file) {
 	PackageManager pm = getPackageManager();
 	PackageInfo pi = pm.getPackageArchiveInfo(file.getAbsolutePath(), 0);
 	try {
-		ApplicationInfo applicationInfo = pi.applicationInfo;
-		applicationInfo.sourceDir = file.getAbsolutePath();
-		applicationInfo.publicSourceDir = file.getAbsolutePath();
-		apkInfo = new ApkInfo((BitmapDrawable)pm.getApplicationIcon(applicationInfo), (String)pm.getApplicationLabel(applicationInfo), applicationInfo.packageName,
-				file.lastModified(),file.getAbsolutePath());
-		apkMap.put(String.valueOf(file.lastModified()), apkInfo);
-		modTime.add(file.lastModified());
+		if (apkMap.get(String.valueOf(file.lastModified()))==null){
+
+			ApplicationInfo applicationInfo = pi.applicationInfo;
+			applicationInfo.sourceDir = file.getAbsolutePath();
+			applicationInfo.publicSourceDir = file.getAbsolutePath();
+			apkInfo = new ApkInfo((BitmapDrawable)pm.getApplicationIcon(applicationInfo), (String)pm.getApplicationLabel(applicationInfo), applicationInfo.packageName,
+					file.lastModified(),file.getAbsolutePath());
+			apkMap.put(String.valueOf(file.lastModified()), apkInfo);
+			modTime.add(file.lastModified());
+		}
 	} catch (Exception e) {
 		// TODO: handle exception
 //		Toast.makeText(this, file.getAbsolutePath()+" is bad file!.", Toast.LENGTH_LONG).show();
@@ -347,6 +361,23 @@ public void show_apkInfo_list(){
 	intent.setComponent(comp);
 	intent.setAction("android.intent.action.VIEW");
 	startActivityForResult( intent , 0);
+}
+
+@Override
+protected void onPause() {
+	// TODO Auto-generated method stub
+	super.onPause();
+//	show_apklist();
+}
+
+@Override
+public boolean onKeyDown(int keyCode, KeyEvent event) {
+	// TODO Auto-generated method stub
+	if (keyCode==KeyEvent.KEYCODE_BACK){
+		moveTaskToBack(false);
+		return true;
+	}
+	return super.onKeyDown(keyCode, event);
 }
     
 }

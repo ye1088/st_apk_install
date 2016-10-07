@@ -89,6 +89,8 @@ public class Utils {
     	
     }
     
+    
+    
 
     //安装apk的代码
     public void install_apk(String apkPath,Context context) {

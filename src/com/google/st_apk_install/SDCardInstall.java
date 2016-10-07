@@ -2,6 +2,7 @@ package com.google.st_apk_install;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.zip.ZipException;
 
 import android.app.Activity;
@@ -38,7 +39,9 @@ public class SDCardInstall extends Activity{
 		util = new Utils();
 		Intent intent = getIntent();
 		Uri data = intent.getData();
-		final String xapkPath = data.toString().substring(7);
+		try {
+			final String xapkPath = new String((data.toString().substring(7)).getBytes(),"utf-8");
+		
 		if (xapkPath.endsWith(".xapk")||xapkPath.endsWith(".xpk")||xapkPath.endsWith(".dpk")){
 			new Thread(){
 				public void run() {
@@ -53,7 +56,10 @@ public class SDCardInstall extends Activity{
 			Toast.makeText(this, xapkPath+" 不是一个安装包", Toast.LENGTH_LONG).show();
 		}
 		
-		
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 //		finish();
 	}
 	

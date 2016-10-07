@@ -17,9 +17,11 @@ import android.os.Message;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -50,6 +52,7 @@ public class MainActivity extends Activity {
 	ApkAdapter adapter;
 	static Utils util ;
 	ProgressBar delay_bar;
+	InstalledReceiver receiver;
 	
 	Handler handler = new Handler(){
 		public void handleMessage(Message msg) {
@@ -113,6 +116,13 @@ public class MainActivity extends Activity {
     protected void onStart() {
     	// TODO Auto-generated method stub
     	super.onStart();
+    	
+    	receiver = new InstalledReceiver();
+    	IntentFilter intentFilter = new IntentFilter();
+    	intentFilter.addAction("android.intent.action.PACKAGE_ADDED");
+    	intentFilter.addDataScheme("package");
+    	this.registerReceiver(receiver, intentFilter);
+    	
     	delay_bar = (ProgressBar) findViewById(R.id.delay);
     	SharedPreferences settings = getSharedPreferences("Config.xml", MODE_PRIVATE);
     	boolean isfirst = settings.getBoolean("isFirst", true);
@@ -125,7 +135,51 @@ public class MainActivity extends Activity {
     	
     }
     
-    
+   
+    class InstalledReceiver extends BroadcastReceiver {
+    	
+
+    	@Override
+    	public void onReceive(Context arg0, Intent intent) {
+    		// TODO Auto-generated method stub
+    		if (intent.getAction().equals("android.intent.action.PACKAGE_ADDED")){
+    			Log.i("receiver", "接收到信息了");
+    			String packageName = intent.getDataString().substring(8);
+    			Log.i("receiver", packageName);
+    			File dirs = new File("/sdcard");
+    			File[] listFiles = dirs.listFiles();
+    			for (File file : listFiles) {
+    				if (file.getName().equals(packageName)&&file.isDirectory()){
+    					copyObb(file.getAbsolutePath(),packageName,"dir");
+    					Log.i("receiver", "开始拷贝了");
+    					break;
+    				}else if (file.getName().endsWith(".obb")&&file.getName().contains(packageName)){
+    					copyObb(file.getAbsolutePath(),packageName,"file");
+    					break;
+    				}
+    			}
+    		}
+    	}
+    	
+    	private void copyObb(String obbPath,String packName,String tag){
+    		File obb_dir = new File("/sdcard/Android/obb/"+packName);
+    		if (!obb_dir.exists()){
+    			obb_dir.mkdirs();
+    		}
+    		if (tag.equals("file")){
+    			util.copyFile(obbPath, obb_dir.getAbsolutePath()+File.separator+obbPath.split(File.separator)[-1]);
+    		}else {
+    			File dir_file = new File(obbPath);
+    			File[] listFiles = dir_file.listFiles();
+    			for (File file : listFiles) {
+    				Log.i("receiver", file.getAbsolutePath());
+    				Log.i("receiver", obb_dir.getAbsolutePath()+File.separator+"11111111111111111");
+    				util.copyFile(file.getAbsolutePath(), obb_dir.getAbsolutePath()+File.separator+file.getName());
+    			}
+    		}
+    	}
+
+    }
     
     private void init() {
 		// TODO Auto-generated method stub

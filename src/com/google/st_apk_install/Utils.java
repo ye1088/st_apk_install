@@ -69,10 +69,12 @@ public class Utils {
                  Zin.close();  
              } catch (IOException e) {  
                  // TODO Auto-generated catch block  
+            	 Log.i("error", "内部出错");
                  e.printStackTrace();  
              }  
          } catch (FileNotFoundException e) {  
              // TODO Auto-generated catch block  
+        	 Log.i("error", "外部出错");
              e.printStackTrace();  
          }  
 //        File desDir = new File(folderPath);
@@ -166,8 +168,8 @@ public class Utils {
     
     public void copyFile(String srcPath, String dstPath){
     	try {
-			FileInputStream fis = new FileInputStream(srcPath);
-			FileOutputStream fos = new FileOutputStream(dstPath);
+			FileInputStream fis = new FileInputStream(new File(srcPath));
+			FileOutputStream fos = new FileOutputStream(new File(dstPath));
 			byte[] buffer = new byte[BUFF_SIZE];
 			int len;
 			while ((len = fis.read(buffer, 0, buffer.length))!=-1){

@@ -17,6 +17,7 @@ import android.os.Message;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -116,12 +117,14 @@ public class MainActivity extends Activity {
     protected void onStart() {
     	// TODO Auto-generated method stub
     	super.onStart();
-    	
+    	Intent intent = new Intent(this ,UnDieService.class);
+		this.startService(intent);
     	receiver = new InstalledReceiver();
     	IntentFilter intentFilter = new IntentFilter();
     	intentFilter.addAction("android.intent.action.PACKAGE_ADDED");
     	intentFilter.addDataScheme("package");
     	this.registerReceiver(receiver, intentFilter);
+    	this.registerReceiver(new UnDieReceiver(), intentFilter);
     	
     	delay_bar = (ProgressBar) findViewById(R.id.delay);
     	SharedPreferences settings = getSharedPreferences("Config.xml", MODE_PRIVATE);
@@ -186,6 +189,8 @@ public class MainActivity extends Activity {
     	
 		util.makeDirs("/sdcard/st_unZip");
 		util.makeDirs("/sdcard/Android/obb");
+		Intent intent = new Intent(this,ApkJiaoCheng.class);
+		startActivity(intent);
 		
 	}
 

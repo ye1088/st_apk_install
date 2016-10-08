@@ -21,35 +21,42 @@ public final class R {
         public static final int activity_vertical_margin=0x7f040001;
     }
     public static final class drawable {
-        public static final int ic_launcher=0x7f020000;
-        public static final int jiaocheng_0=0x7f020001;
-        public static final int jiaocheng_1=0x7f020002;
-        public static final int jiaocheng_2=0x7f020003;
+        public static final int apk_jiaocheng_1=0x7f020000;
+        public static final int apk_jiaocheng_2=0x7f020001;
+        public static final int ic_launcher=0x7f020002;
+        public static final int jiaocheng_0=0x7f020003;
+        public static final int jiaocheng_1=0x7f020004;
+        public static final int jiaocheng_2=0x7f020005;
     }
     public static final class id {
-        public static final int action_settings=0x7f08000f;
+        public static final int action_settings=0x7f080013;
         public static final int apklist=0x7f080001;
         public static final int apklistbview=0x7f080003;
         public static final int apkname=0x7f080006;
         public static final int delay=0x7f080002;
-        public static final int finish=0x7f08000d;
+        public static final int finish=0x7f080011;
+        public static final int finish_2=0x7f08000a;
         public static final int icon=0x7f080004;
-        public static final int imageView1=0x7f080008;
-        public static final int imageView2=0x7f08000a;
-        public static final int imageView3=0x7f08000c;
+        public static final int imageView1=0x7f08000c;
+        public static final int imageView2=0x7f08000e;
+        public static final int imageView3=0x7f080010;
+        public static final int none1=0x7f080007;
+        public static final int none2=0x7f080008;
+        public static final int none3=0x7f080009;
         public static final int packname=0x7f080005;
         public static final int refresh=0x7f080000;
-        public static final int sdcard_install=0x7f08000e;
-        public static final int textView1=0x7f080007;
-        public static final int textView2=0x7f080009;
-        public static final int textView3=0x7f08000b;
+        public static final int sdcard_install=0x7f080012;
+        public static final int textView1=0x7f08000b;
+        public static final int textView2=0x7f08000d;
+        public static final int textView3=0x7f08000f;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
         public static final int apk_info=0x7f030001;
-        public static final int jiao_cheng=0x7f030002;
-        public static final int sdcard_install=0x7f030003;
-        public static final int test=0x7f030004;
+        public static final int apk_jiao_cheng=0x7f030002;
+        public static final int jiao_cheng=0x7f030003;
+        public static final int sdcard_install=0x7f030004;
+        public static final int test=0x7f030005;
     }
     public static final class menu {
         public static final int main=0x7f070000;

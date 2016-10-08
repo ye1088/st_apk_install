@@ -3,6 +3,7 @@ package com.google.st_apk_install;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.zip.ZipException;
 
 import android.app.Activity;
@@ -12,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.widget.Toast;
 
 public class SDCardInstall extends Activity{
@@ -39,8 +41,15 @@ public class SDCardInstall extends Activity{
 		util = new Utils();
 		Intent intent = getIntent();
 		Uri data = intent.getData();
+//		Log.i("info", data.toString());
+//		try {
+//			Log.i("info", URLDecoder.decode(data.toString(),"UTF-8"));
+//		} catch (UnsupportedEncodingException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 		try {
-			final String xapkPath = new String((data.toString().substring(7)).getBytes(),"utf-8");
+			final String xapkPath = URLDecoder.decode(data.toString(),"UTF-8").substring(7);
 		
 		if (xapkPath.endsWith(".xapk")||xapkPath.endsWith(".xpk")||xapkPath.endsWith(".dpk")){
 			new Thread(){

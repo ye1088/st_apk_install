@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <ScrollView 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+	<LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:gravity="top"
+	    android:orientation="vertical"
+	    >
+	    <TextView
+        android:id="@+id/none1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="	    这个安装器主要针对带数据包有游戏的处理，如果数据包和apk是分开的 请将数据包放SDCard中，
+        当你安装完apk后，这个安装器会自动将数据包拷贝到Android/obb下，实现这些功能的前提是让安装器在后台运行，不要关掉！！
+        如果安装数据包和apk压缩在一起的形式，如：xapk、dpk、xpk这种可以直接点开安装" />
+	    <ImageView 
+	        android:id="@+id/none2"
+	        android:layout_width="wrap_content"
+	        android:layout_height="450sp"
+	        android:src="@drawable/apk_jiaocheng_1"
+	        />
+	    <ImageView 
+	        android:id="@+id/none3"
+	        android:layout_width="wrap_content"
+	        android:layout_height="450sp"
+	        android:src="@drawable/apk_jiaocheng_2"
+	        />
+	     <TextView
+        android:id="@+id/none1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="	然后我们的安装器就会自动安装游戏，并处理好数据包~"/>
+	    
+	
+	 
+	 <Button 
+	     android:id="@+id/finish_2"
+	     android:layout_width="match_parent"
+	     android:layout_height="wrap_content"
+	     android:onClick="finish"
+	     android:text="我悟了！~"
+	     />
+	    
+	</LinearLayout>
+	</ScrollView>
+
+</LinearLayout>

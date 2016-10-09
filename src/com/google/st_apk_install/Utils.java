@@ -16,6 +16,8 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -106,6 +108,21 @@ public class Utils {
 //        }
     }
     
+    
+    protected boolean is_file_exist(String apkPath) {
+		// TODO Auto-generated method stub
+		return new File(apkPath).exists();
+	}
+    
+    void show_dialog_tip(String title,String message,String bt_text,Context context){
+    	Builder dialog = new AlertDialog.Builder(context);
+    	dialog.setTitle(title);
+    	dialog.setMessage(message);
+    	dialog.setPositiveButton(bt_text, null);
+    	dialog.show();
+    	
+    }
+    
     public void makeDirs(String path){
     	File file = new File(path);
     	if (!file.exists()){
@@ -161,7 +178,9 @@ public class Utils {
     	Intent intent = new Intent(Intent.ACTION_VIEW);
     	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     	intent.setAction(android.content.Intent.ACTION_VIEW);
-    	intent.setDataAndType(Uri.parse("file://"+apkPath),"application/vnd.android.package-archive");
+//    	intent.setDataAndType(Uri.parse("file://"+apkPath),"application/vnd.android.package-archive");
+    	intent.setDataAndType(Uri.fromFile(new File(apkPath)), "application/vnd.android.package-archive");
+    	
     	context.startActivity(intent);
 		
 	}

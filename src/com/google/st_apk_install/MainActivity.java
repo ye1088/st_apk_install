@@ -94,16 +94,20 @@ public class MainActivity extends Activity {
 				Log.i("List_Length", pos+" "+modTime.size());
 				String apk_name = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apk_name;
 				final String apkPath = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apkPath;
-				if (apkPath.endsWith(".apk")){
-					util.install_apk(apkPath,MainActivity.this);
-				}else if(apkPath.endsWith(".xapk")||apkPath.endsWith(".xpk")||apkPath.endsWith(".dpk")){
-					new Thread(){
-						public void run() {
-							xapk_install(apkPath,MainActivity.this);
-							
-						};
-					}.start();
-					
+				if (util.is_file_exist(apkPath)){
+					if (apkPath.endsWith(".apk")){
+						util.install_apk(apkPath,MainActivity.this);
+					}else if(apkPath.endsWith(".xapk")||apkPath.endsWith(".xpk")||apkPath.endsWith(".dpk")){
+						new Thread(){
+							public void run() {
+								xapk_install(apkPath,MainActivity.this);
+								
+							};
+						}.start();
+						
+					}
+				}else{
+					util.show_dialog_tip("错误", "访问的安装包不存在！！请刷新安装包列表！~", "确定", MainActivity.this);
 				}
 			}
 
@@ -112,7 +116,10 @@ public class MainActivity extends Activity {
     }
     
 
- //启动时初始化各项配置  
+ 
+
+
+//启动时初始化各项配置  
     @Override
     protected void onStart() {
     	// TODO Auto-generated method stub

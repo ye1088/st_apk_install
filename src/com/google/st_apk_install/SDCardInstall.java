@@ -51,7 +51,8 @@ public class SDCardInstall extends Activity{
 		try {
 			final String xapkPath = URLDecoder.decode(data.toString(),"UTF-8").substring(7);
 		
-		if (xapkPath.endsWith(".xapk")||xapkPath.endsWith(".xpk")||xapkPath.endsWith(".dpk")){
+		if (xapkPath.endsWith(".xapk")||xapkPath.endsWith(".xpk")
+				||xapkPath.endsWith(".dpk")||xapkPath.endsWith(".tpk")){
 			new Thread(){
 				public void run() {
 					xapk_install(xapkPath,SDCardInstall.this);

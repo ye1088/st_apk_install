@@ -96,7 +96,8 @@ public class MainActivity extends Activity {
 					
 					if (apkPath.endsWith(".apk")){
 						util.install_apk(apkPath,MainActivity.this);
-					}else if(apkPath.endsWith(".xapk")||apkPath.endsWith(".xpk")||apkPath.endsWith(".dpk")){
+					}else if(apkPath.endsWith(".xapk")||apkPath.endsWith(".xpk")
+							||apkPath.endsWith(".dpk")||apkPath.endsWith(".tpk")){
 						
 //						new Thread(){
 //							public void run() {
@@ -319,7 +320,7 @@ private void list_file(String path) {
 					if(file.getName().endsWith(".apk")){
 						getApkInfo(file);
 					}else if (file.getName().endsWith(".xapk")||file.getName().endsWith(".dpk")
-							||file.getName().endsWith(".xpk")){
+							||file.getName().endsWith(".xpk")||file.getName().endsWith(".tpk")){
 						getZipIndo(file);
 					}
 				}

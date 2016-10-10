@@ -73,12 +73,10 @@ public class MainActivity extends Activity {
 			
 		};
 	};
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
 //        Intent intent = getIntent();
 //        Uri data = intent.getData();
 //        Log.i("uri", data.toString().substring(7));
@@ -86,7 +84,7 @@ public class MainActivity extends Activity {
         //将手机内存中的所有apk等显示出来
         show_apklist();
         apkList.setOnItemClickListener(new OnItemClickListener() {
-
+        	
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int pos,
 					long arg3) {
@@ -95,20 +93,23 @@ public class MainActivity extends Activity {
 				String apk_name = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apk_name;
 				final String apkPath = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apkPath;
 				if (util.is_file_exist(apkPath)){
+					
 					if (apkPath.endsWith(".apk")){
 						util.install_apk(apkPath,MainActivity.this);
 					}else if(apkPath.endsWith(".xapk")||apkPath.endsWith(".xpk")||apkPath.endsWith(".dpk")){
-						new Thread(){
-							public void run() {
+						
+//						new Thread(){
+//							public void run() {
 								xapk_install(apkPath,MainActivity.this);
 								
-							};
-						}.start();
+//							};
+//						}.start();
 						
 					}
 				}else{
 					util.show_dialog_tip("错误", "访问的安装包不存在！！请刷新安装包列表！~", "确定", MainActivity.this);
 				}
+				
 			}
 
 			
@@ -232,39 +233,51 @@ public void btclick(View v){
 
 	//xapk和xpk的安装
     public static void xapk_install(String apkPath,Context context){
-    	try {
-			String unZipDir = String.valueOf((new File(apkPath)).lastModified()+1);
-			util.upZipFile(new File(apkPath), "/sdcard/st_unZip/"+unZipDir);
-			File uZipDir = new File("/sdcard/st_unZip/"+unZipDir);
-			File[] listFiles = uZipDir.listFiles();
-			String apkPackage = "";
-			String apkPath_obb = "";
-			if (listFiles!=null){
-				for (File file : listFiles) {
-					if ((file.getName()).endsWith(".apk")){
-						apkPath_obb = file.getAbsolutePath();
-						
-						apkPackage = util.getApkPackageName(file.getAbsolutePath(), context);
+    	do{
+	    	try {
+				String unZipDir = String.valueOf((new File(apkPath)).lastModified());
+				util.upZipFile(new File(apkPath), "/sdcard/st_unZip/"+unZipDir);
+				File uZipDir = new File("/sdcard/st_unZip/"+unZipDir);
+	//			util.show_dialog_tip("错误", uZipDir.getAbsolutePath(), "确定", context);
+				File[] listFiles = uZipDir.listFiles();
+				String apkPackage = "";
+				String apkPath_obb = "";
+				if (listFiles!=null){
+					for (File file : listFiles) {
+	//					util.show_dialog_tip("错误", file.getName(), "确定", context);
+						if ((file.getName()).endsWith(".apk")){
+	//						util.show_dialog_tip("错误", file.getAbsolutePath(), "确定", context);
+							apkPath_obb = file.getAbsolutePath();
+							
+							apkPackage = util.getApkPackageName(file.getAbsolutePath(), context);
+						}
 					}
 				}
+				
+				if (listFiles.length==1){
+					util.show_dialog_tip("错误：", "这个安装包有点问题，请到"+uZipDir.getAbsolutePath()+"下，手动安装，Sorry....", "确定", context);
+					break;
+				}
+				
+				File obb_dir_exist = new File("/sdcard/Android/obb/"+apkPackage);
+				if (!(obb_dir_exist.exists())){
+					obb_dir_exist.mkdirs();
+				}
+				
+				util.copyObb(uZipDir.getAbsolutePath(),obb_dir_exist.getAbsolutePath());
+				
+				Log.i("apkPath", apkPath_obb);
+				util.install_apk(apkPath_obb,context);
+				
+				
+			} catch (ZipException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			
-			File obb_dir_exist = new File("/sdcard/Android/obb/"+apkPackage);
-			if (!(obb_dir_exist.exists())){
-				obb_dir_exist.mkdirs();
-			}
-			
-			util.copyObb(uZipDir.getAbsolutePath(),obb_dir_exist.getAbsolutePath());
-			util.install_apk(apkPath_obb,context);
-			
-			
-		} catch (ZipException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    	}while(false);
     }
     
    

@@ -19,6 +19,7 @@ import java.util.zip.ZipInputStream;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -114,12 +115,22 @@ public class Utils {
 		return new File(apkPath).exists();
 	}
     
-    void show_dialog_tip(String title,String message,String bt_text,Context context){
-    	Builder dialog = new AlertDialog.Builder(context);
+    AlertDialog show_dialog_tip(String title,String message,String bt_text,Context context){
+	AlertDialog dialog = new AlertDialog(context){
+	    		
+	    	} ;
     	dialog.setTitle(title);
     	dialog.setMessage(message);
-    	dialog.setPositiveButton(bt_text, null);
+    	dialog.setButton(DialogInterface.BUTTON_POSITIVE,bt_text, new DialogInterface.OnClickListener(){
+    		@Override
+    		public void onClick(DialogInterface arg0, int arg1) {
+    			// TODO Auto-generated method stub
+    			
+    		}
+    	});
     	dialog.show();
+    	
+    	return dialog;
     	
     }
     
@@ -174,7 +185,10 @@ public class Utils {
     //安装apk的代码
     public void install_apk(String apkPath,Context context) {
 		// TODO Auto-generated method stub
-    	
+    	Log.i("apkPath", apkPath);
+    	if(!(new File(apkPath).exists())){
+    		show_dialog_tip("错误", "访问的安装包不存在！！请刷新安装包列表！~"+apkPath+"1111", "确定", context);
+    	}
     	Intent intent = new Intent(Intent.ACTION_VIEW);
     	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     	intent.setAction(android.content.Intent.ACTION_VIEW);

@@ -80,6 +80,11 @@ public class MainActivity extends Activity {
 //        Intent intent = getIntent();
 //        Uri data = intent.getData();
 //        Log.i("uri", data.toString().substring(7));
+        Intent start_intent = getIntent();
+        boolean is_service_awake = start_intent.getBooleanExtra("is_service_awake", false);
+        if (is_service_awake){
+        	util.go_home_page(MainActivity.this);
+        }
         util = new Utils();
         //将手机内存中的所有apk等显示出来
         show_apklist();
@@ -97,7 +102,7 @@ public class MainActivity extends Activity {
 					if (apkPath.endsWith(".apk")){
 						util.install_apk(apkPath,MainActivity.this);
 					}else if(apkPath.endsWith(".xapk")||apkPath.endsWith(".xpk")
-							||apkPath.endsWith(".dpk")||apkPath.endsWith(".tpk")){
+							||apkPath.endsWith(".dpk")||apkPath.endsWith(".tpk")||apkPath.endsWith(".zip")){
 						
 //						new Thread(){
 //							public void run() {
@@ -108,6 +113,9 @@ public class MainActivity extends Activity {
 						Intent intent = new Intent(MainActivity.this,SDCardInstall.class);
 						intent.putExtra("is_main_intall", true);
 						intent.putExtra("tpk_path", apkPath);
+						if (apkPath.endsWith(".zip")){
+							intent.putExtra("is_zip", true);
+						}
 						startActivity(intent);
 					}
 				}else{
@@ -122,6 +130,11 @@ public class MainActivity extends Activity {
     
 
  
+
+
+
+
+
 
 
 //启动时初始化各项配置  
@@ -151,7 +164,7 @@ public class MainActivity extends Activity {
     }
     
    
-    class InstalledReceiver extends BroadcastReceiver {
+    public class InstalledReceiver extends BroadcastReceiver {
     	
 
     	@Override

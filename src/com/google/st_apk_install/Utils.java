@@ -134,6 +134,16 @@ public class Utils {
     	
     }
     
+    public void go_home_page(Context context) {
+		// TODO Auto-generated method stub
+	Intent mHomeIntent =  new Intent(Intent.ACTION_MAIN, null);  
+	mHomeIntent.putExtra("GOHOME","GOHOME");  
+	mHomeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);  
+	mHomeIntent.setClassName("com.android.launcher","com.android.launcher.HomeScreen");  
+	context.startActivity(mHomeIntent);   
+	}
+
+    
     public void makeDirs(String path){
     	File file = new File(path);
     	if (!file.exists()){

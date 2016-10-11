@@ -41,6 +41,11 @@ public class SDCardInstall extends Activity{
 		util = new Utils();
 		Intent intent = getIntent();
 		Uri data = intent.getData();
+		boolean is_main_intall = intent.getBooleanExtra("is_main_intall", false);
+		
+		if (!is_main_intall){
+			
+		
 //		Log.i("info", data.toString());
 //		try {
 //			Log.i("info", URLDecoder.decode(data.toString(),"UTF-8"));
@@ -48,27 +53,38 @@ public class SDCardInstall extends Activity{
 //			// TODO Auto-generated catch block
 //			e1.printStackTrace();
 //		}
-		try {
-			final String xapkPath = URLDecoder.decode(data.toString(),"UTF-8").substring(7);
-		
-		if (xapkPath.endsWith(".xapk")||xapkPath.endsWith(".xpk")
-				||xapkPath.endsWith(".dpk")||xapkPath.endsWith(".tpk")){
+			try {
+				final String xapkPath = URLDecoder.decode(data.toString(),"UTF-8").substring(7);
+			
+			if (xapkPath.endsWith(".xapk")||xapkPath.endsWith(".xpk")
+					||xapkPath.endsWith(".dpk")||xapkPath.endsWith(".tpk")){
+				new Thread(){
+					public void run() {
+						xapk_install(xapkPath,SDCardInstall.this);
+						Message msg = handler.obtainMessage();
+						msg.arg1 = 1100;
+						handler.sendMessage(msg);
+					};
+				}.start();
+				
+			}else{
+				Toast.makeText(this, xapkPath+" 不是一个安装包", Toast.LENGTH_LONG).show();
+			}
+			
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else{
+			final String tpk_path = intent.getStringExtra("tpk_path");
 			new Thread(){
 				public void run() {
-					xapk_install(xapkPath,SDCardInstall.this);
+					xapk_install(tpk_path,SDCardInstall.this);
 					Message msg = handler.obtainMessage();
 					msg.arg1 = 1100;
 					handler.sendMessage(msg);
 				};
 			}.start();
-			
-		}else{
-			Toast.makeText(this, xapkPath+" 不是一个安装包", Toast.LENGTH_LONG).show();
-		}
-		
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 //		finish();
 	}

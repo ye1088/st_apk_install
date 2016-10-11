@@ -101,11 +101,14 @@ public class MainActivity extends Activity {
 						
 //						new Thread(){
 //							public void run() {
-								xapk_install(apkPath,MainActivity.this);
-								
+//								xapk_install(apkPath,MainActivity.this);
+//								
 //							};
 //						}.start();
-						
+						Intent intent = new Intent(MainActivity.this,SDCardInstall.class);
+						intent.putExtra("is_main_intall", true);
+						intent.putExtra("tpk_path", apkPath);
+						startActivity(intent);
 					}
 				}else{
 					util.show_dialog_tip("错误", "访问的安装包不存在！！请刷新安装包列表！~", "确定", MainActivity.this);
@@ -256,7 +259,7 @@ public void btclick(View v){
 				}
 				
 				if (listFiles.length==1){
-					util.show_dialog_tip("错误：", "这个安装包有点问题，请到"+uZipDir.getAbsolutePath()+"下，手动安装，Sorry....", "确定", context);
+//					util.show_dialog_tip("错误：", "这个安装包有点问题，请到"+uZipDir.getAbsolutePath()+"下，手动安装，Sorry....", "确定", context);
 					break;
 				}
 				

@@ -65,8 +65,17 @@ public class MainActivity extends Activity {
 				Collections.sort(modTime,new MyLongCompare());
 				adapter = new ApkAdapter(MainActivity.this,modTime,apkMap);
 				apkList.setAdapter(adapter);
+				
+				Toast.makeText(MainActivity.this, "大部分安装包加载完成，现在可有安装需要安装的软件啦~~", Toast.LENGTH_LONG).show();
 				break;
-
+			case 101:
+				//将文件的修改时间按从大到小的顺序排列
+				Collections.sort(modTime,new MyLongCompare());
+				adapter.setItemList(modTime, apkMap);
+				adapter.notifyDataSetChanged();
+				Toast.makeText(MainActivity.this, "所有安装包加载完成，之前没有找到的安装包，现在都出现了哦~", Toast.LENGTH_LONG).show();
+				break;
+				
 			default:
 				break;
 			}
@@ -83,7 +92,7 @@ public class MainActivity extends Activity {
         Intent start_intent = getIntent();
         boolean is_service_awake = start_intent.getBooleanExtra("is_service_awake", false);
         if (is_service_awake){
-        	util.go_home_page(MainActivity.this);
+        	onBackPressed();
         }
         util = new Utils();
         //将手机内存中的所有apk等显示出来
@@ -310,9 +319,15 @@ private void show_apklist() {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				list_file("/sdcard");
+				list_file("/sdcard",true,false);
+				list_file("/storage",true,true);
 				Message msg = handler.obtainMessage();
 				msg.arg1 = 100;
+				handler.sendMessage(msg);
+				list_file_al_package("/sdcard",true,false);
+				list_file_al_package("/storage",true,true);
+				msg = handler.obtainMessage();
+				msg.arg1 = 101;
 				handler.sendMessage(msg);
 			}
 		}.start();
@@ -322,15 +337,42 @@ private void show_apklist() {
 
 
 //遍历文件夹 找出安装包
-private void list_file(String path) {
+private void list_file(String path,boolean is_root_dir,boolean is_mnt_added_storage) {
 	// TODO Auto-generated method stub
 	File dir = new File(path);
 	if (dir.exists()){
 		File[] listFiles = dir.listFiles();
 		if (listFiles!=null){
 			for (File file : listFiles) {
-				if (file.isDirectory()){
-					list_file(file.getAbsolutePath());
+				if (file.isDirectory()&&(file.getName().toLowerCase().contains("download")||
+						file.getName().toLowerCase().contains("file_recv")||is_root_dir||is_mnt_added_storage)){
+					list_file(file.getAbsolutePath(),is_mnt_added_storage,false);
+				}else{
+					//判断文件是不是我们需要的东东
+					if(file.getName().endsWith(".apk")){
+						getApkInfo(file);
+					}else if (file.getName().endsWith(".xapk")||file.getName().endsWith(".dpk")
+							||file.getName().endsWith(".xpk")||file.getName().endsWith(".tpk")){
+						getZipIndo(file);
+					}
+				}
+			}
+		}
+		
+	}
+	
+}
+//遍历文件夹 找出所有安装包
+private void list_file_al_package(String path,boolean is_root_dir,boolean is_mnt_added_storage) {
+	// TODO Auto-generated method stub
+	File dir = new File(path);
+	if (dir.exists()){
+		File[] listFiles = dir.listFiles();
+		if (listFiles!=null){
+			for (File file : listFiles) {
+				if (file.isDirectory()&&!(file.getName().toLowerCase().contains("download")||
+						file.getName().toLowerCase().contains("file_recv"))){
+					list_file_al_package(file.getAbsolutePath(),is_mnt_added_storage,false);
 				}else{
 					//判断文件是不是我们需要的东东
 					if(file.getName().endsWith(".apk")){

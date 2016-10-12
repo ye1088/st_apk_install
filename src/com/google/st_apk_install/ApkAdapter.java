@@ -25,6 +25,10 @@ public class ApkAdapter extends BaseAdapter{
 		this.mInflater = LayoutInflater.from(context);
 	}
 
+	public void setItemList(ArrayList modTime, Map apkMap) {
+		this.modTime = modTime;
+		this.apkMap = apkMap;
+    }
 	@Override
 	public int getCount() {
 		// TODO Auto-generated method stub

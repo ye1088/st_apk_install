@@ -1,6 +1,7 @@
 package com.google.st_apk_install;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import android.content.Context;
@@ -63,7 +64,7 @@ public class ApkAdapter extends BaseAdapter{
 		}
 		holder.icon.setImageBitmap(((ApkInfo)getItem(arg0)).icon);
 		holder.apkName.setText(((ApkInfo)getItem(arg0)).apk_name);
-		holder.packName.setText(((ApkInfo)getItem(arg0)).pack_name);
+		holder.packName.setText(((ApkInfo)getItem(arg0)).apkPath);
 		return arg1;
 		
 	}

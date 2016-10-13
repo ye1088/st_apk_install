@@ -48,32 +48,40 @@ public class MainActivity extends Activity {
 	ListView apkList ;
 	ArrayList modTime;
 	ApkInfo apkInfo;
+	ArrayList real_modTime;
+	Map real_apkMap;
 	//根据modTime中的文件最后修改的时间戳 来获取对应 的apk信息
 	Map apkMap ;
 	ApkAdapter adapter;
 	static Utils util ;
 	ProgressBar delay_bar;
 	InstalledReceiver receiver;
+	Button refresh_btn;
 	
 	Handler handler = new Handler(){
 		public void handleMessage(Message msg) {
-
+			Collections.sort(real_modTime,new MyLongCompare());
+//			for (Object time : real_modTime) {
+//				Log.i("copyOtherMap", "key = "+time.toString());
+//			}
 			switch (msg.arg1) {
 			case 100:
+				refresh_btn.setEnabled(false);
 				delay_bar.setVisibility(View.INVISIBLE);
 				//将文件的修改时间按从大到小的顺序排列
-				Collections.sort(modTime,new MyLongCompare());
-				adapter = new ApkAdapter(MainActivity.this,modTime,apkMap);
+				
+				adapter = new ApkAdapter(MainActivity.this,real_modTime,real_apkMap);
 				apkList.setAdapter(adapter);
 				
 				Toast.makeText(MainActivity.this, "大部分安装包加载完成，现在可有安装需要安装的软件啦~~", Toast.LENGTH_LONG).show();
 				break;
 			case 101:
 				//将文件的修改时间按从大到小的顺序排列
-				Collections.sort(modTime,new MyLongCompare());
-				adapter.setItemList(modTime, apkMap);
+//				Collections.sort(modTime,new MyLongCompare());
+				adapter.setItemList(real_modTime, real_apkMap);
 				adapter.notifyDataSetChanged();
 				Toast.makeText(MainActivity.this, "所有安装包加载完成，之前没有找到的安装包，现在都出现了哦~", Toast.LENGTH_LONG).show();
+				refresh_btn.setEnabled(true);
 				break;
 				
 			default:
@@ -86,6 +94,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+		apkList = (ListView) findViewById(R.id.apklistbview);
+		real_modTime = new ArrayList<Long>();
 //        Intent intent = getIntent();
 //        Uri data = intent.getData();
 //        Log.i("uri", data.toString().substring(7));
@@ -103,9 +113,9 @@ public class MainActivity extends Activity {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int pos,
 					long arg3) {
 				// TODO Auto-generated method stub
-				Log.i("List_Length", pos+" "+modTime.size());
-				String apk_name = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apk_name;
-				final String apkPath = ((ApkInfo)apkMap.get(String.valueOf(modTime.get(pos)))).apkPath;
+				Log.i("List_Length", pos+" "+real_modTime.size());
+				String apk_name = ((ApkInfo)real_apkMap.get(String.valueOf(real_modTime.get(pos)))).apk_name;
+				final String apkPath = ((ApkInfo)real_apkMap.get(String.valueOf(real_modTime.get(pos)))).apkPath;
 				if (util.is_file_exist(apkPath)){
 					
 					if (apkPath.endsWith(".apk")){
@@ -151,8 +161,10 @@ public class MainActivity extends Activity {
     protected void onStart() {
     	// TODO Auto-generated method stub
     	super.onStart();
-    	Intent intent = new Intent(this ,UnDieService.class);
-		this.startService(intent);
+
+    	refresh_btn = (Button) findViewById(R.id.refresh);
+//    	Intent intent = new Intent(this ,UnDieService.class);
+//		this.startService(intent);
     	receiver = new InstalledReceiver();
     	IntentFilter intentFilter = new IntentFilter();
     	intentFilter.addAction("android.intent.action.PACKAGE_ADDED");
@@ -246,8 +258,13 @@ public void btclick(View v){
 		break;
 		
 	case R.id.refresh:
+		refresh_btn.setEnabled(false);
 		delay_bar.setVisibility(View.VISIBLE);
+		modTime.clear();
+		apkMap.clear();
+		
 		show_apklist();
+		
 		break;
 
 	default:
@@ -312,25 +329,46 @@ public void btclick(View v){
 
 private void show_apklist() {
 		// TODO Auto-generated method stub
-		apkList = (ListView) findViewById(R.id.apklistbview);
-		apkMap = new HashMap();
-		modTime = new ArrayList<Long>();
 		new Thread(){
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
+
+				apkMap = new HashMap();
+				modTime = new ArrayList<Long>();
+				apkMap.clear();
+				modTime.clear();
 				list_file("/sdcard",true,false);
 				list_file("/storage",true,true);
+				real_apkMap = util.copyOtherMap(apkMap, modTime,"ApkInfo");
+				
+				real_modTime = util.copyOtherList(modTime,"Long");
+//				for (Object time : real_modTime) {
+//					Log.i("copyOtherMap", "key = "+time.toString());
+//				}
 				Message msg = handler.obtainMessage();
 				msg.arg1 = 100;
 				handler.sendMessage(msg);
+				apkMap.clear();
+				modTime.clear();
 				list_file_al_package("/sdcard",true,false);
 				list_file_al_package("/storage",true,true);
+				real_apkMap = util.copyOtherMap(apkMap, modTime,"ApkInfo");
+				
+				real_modTime = util.copyOtherList(modTime,"Long");
+				
 				msg = handler.obtainMessage();
 				msg.arg1 = 101;
 				handler.sendMessage(msg);
 			}
 		}.start();
+//		
+//		new Thread(){
+//			public void run() {
+//				
+//				
+//			}
+//		}.start();
 		
 	}
 
@@ -370,8 +408,8 @@ private void list_file_al_package(String path,boolean is_root_dir,boolean is_mnt
 		File[] listFiles = dir.listFiles();
 		if (listFiles!=null){
 			for (File file : listFiles) {
-				if (file.isDirectory()&&!(file.getName().toLowerCase().contains("download")||
-						file.getName().toLowerCase().contains("file_recv"))){
+				if (file.isDirectory()){//&&!(file.getName().toLowerCase().contains("download")||
+					//file.getName().toLowerCase().contains("file_recv"))
 					list_file_al_package(file.getAbsolutePath(),is_mnt_added_storage,false);
 				}else{
 					//判断文件是不是我们需要的东东

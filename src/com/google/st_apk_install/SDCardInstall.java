@@ -22,19 +22,22 @@ import android.widget.Toast;
 
 public class SDCardInstall extends Activity{
 	Utils util;
+	InstalledReceiver receiver;
+	UnDieReceiver undieReceiver;
 	protected void onStart() {
 		super.onStart();
-		InstalledReceiver receiver = new InstalledReceiver();
+		receiver = new InstalledReceiver();
     	IntentFilter intentFilter = new IntentFilter();
     	intentFilter.addAction("android.intent.action.PACKAGE_ADDED");
     	intentFilter.addDataScheme("package");
     	this.registerReceiver(receiver, intentFilter);
+    	undieReceiver = new UnDieReceiver();
 	}
 	Handler handler = new Handler(){
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.arg1) {
 			case 1100:
-				util.go_home_page(SDCardInstall.this);
+				onBackPressed();
 				break;
 
 			default:
@@ -59,7 +62,7 @@ public class SDCardInstall extends Activity{
 	    	IntentFilter intentFilter = new IntentFilter();
 	    	intentFilter.addAction("android.intent.action.PACKAGE_ADDED");
 	    	intentFilter.addDataScheme("package");
-	    	this.registerReceiver(new UnDieReceiver(), intentFilter);
+	    	this.registerReceiver(undieReceiver, intentFilter);
 			
 		
 //		Log.i("info", data.toString());
@@ -85,7 +88,7 @@ public class SDCardInstall extends Activity{
 				
 			}else{
 				Toast.makeText(this, xapkPath+" 不是一个安装包", Toast.LENGTH_LONG).show();
-				util.go_home_page(SDCardInstall.this);
+				onBackPressed();
 			}
 			
 			} catch (UnsupportedEncodingException e) {
@@ -189,6 +192,13 @@ public class SDCardInstall extends Activity{
     		}
     	}
 
+    }
+    @Override
+    protected void onDestroy() {
+    	// TODO Auto-generated method stub
+    	unregisterReceiver(receiver);
+    	unregisterReceiver(undieReceiver);
+    	super.onDestroy();
     }
    
 

@@ -11,9 +11,9 @@ public class UnDieService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		// TODO Auto-generated method stub
-		Intent main_intent = new Intent(this,MainActivity.class);
-		main_intent.putExtra("is_service_awake", true);
-		startActivity(main_intent);
+//		Intent main_intent = new Intent(this,MainActivity.class);
+//		main_intent.putExtra("is_service_awake", true);
+//		startActivity(main_intent);
 		return Service.START_STICKY;
 	}
 	

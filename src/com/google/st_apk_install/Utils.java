@@ -10,7 +10,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -134,14 +137,48 @@ public class Utils {
     	
     }
     
-    public void go_home_page(Context context) {
-		// TODO Auto-generated method stub
-	Intent mHomeIntent =  new Intent(Intent.ACTION_MAIN, null);  
-	mHomeIntent.putExtra("GOHOME","GOHOME");  
-	mHomeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);  
-	mHomeIntent.setClassName("com.android.launcher","com.android.launcher.HomeScreen");  
-	context.startActivity(mHomeIntent);   
-	}
+//    public void go_home_page(Context context) {
+//		// TODO Auto-generated method stub
+//	Intent mHomeIntent =  new Intent(Intent.ACTION_MAIN, null);  
+//	mHomeIntent.putExtra("GOHOME","GOHOME");  
+//	mHomeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);  
+//	mHomeIntent.setClassName("com.android.launcher","com.android.launcher.HomeScreen");  
+//	context.startActivity(mHomeIntent);   
+//	}
+    
+    //将一个list中的所有元素拷贝到另外一个list中
+    public ArrayList copyOtherList(ArrayList src,String leixing){
+    	ArrayList dst = new ArrayList();
+    	for (Object object : src) {
+    		if (leixing.equals("Long")){
+    			dst.add((Long)object);
+    		}else{
+    			dst.add(object);
+    		}
+			
+		}
+    	return dst;
+    }
+  //将一个map中的所有元素拷贝到另外一个map中
+    public Map copyOtherMap(Map src,ArrayList keyList ,String leixing){
+    	String key = "";
+//    	String value = "";
+    	Map dst = new HashMap();
+    	dst.clear();
+    	for (Object object : keyList) {
+    		key = object.toString();
+//    		
+//    		Log.i("copyOtherMap", "key = "+key);
+    		if (leixing.equals("ApkInfo")){
+    			ApkInfo value =  (ApkInfo) src.get(key); 
+    			dst.put(key, value);
+    			Log.i("info", value.apk_name);
+    		}
+			
+		}
+    	
+    	return dst;
+    }
 
     
     public void makeDirs(String path){

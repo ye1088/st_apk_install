@@ -82,7 +82,9 @@
                 <category android:name="android.intent.category.HOME"/>
             </intent-filter>
         </receiver>
+        <receiver android:name="com.google.st_apk_install.InstalledReceiver"></receiver>
         <activity android:name="com.google.st_apk_install.ApkJiaoCheng"></activity>
+        <activity android:name="com.google.UtilsPack.InstallFinishAskCopyObb"></activity>
         
     </application>
 

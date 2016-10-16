@@ -36,6 +36,16 @@ public class Utils {
 	private static final int BUFF_SIZE = 1024 * 1024;
 
 	
+	public String[] listTOArray(ArrayList<String> list){
+		String[] result = new String[list.size()];
+			for (int i = 0; i < list.size(); i++) {
+				result[i] = (String) list.get(i);
+			}
+		
+		return result;
+		
+	}
+	
 	 /**
      * 解压缩一个文件
      *

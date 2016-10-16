@@ -6,7 +6,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.zip.ZipException;
 
-import com.google.st_apk_install.MainActivity.InstalledReceiver;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -22,15 +21,15 @@ import android.widget.Toast;
 
 public class SDCardInstall extends Activity{
 	Utils util;
-	InstalledReceiver receiver;
+//	InstalledReceiver receiver;
 	UnDieReceiver undieReceiver;
 	protected void onStart() {
 		super.onStart();
-		receiver = new InstalledReceiver();
-    	IntentFilter intentFilter = new IntentFilter();
-    	intentFilter.addAction("android.intent.action.PACKAGE_ADDED");
-    	intentFilter.addDataScheme("package");
-    	this.registerReceiver(receiver, intentFilter);
+//		receiver = new InstalledReceiver();
+//    	IntentFilter intentFilter = new IntentFilter();
+//    	intentFilter.addAction("android.intent.action.PACKAGE_ADDED");
+//    	intentFilter.addDataScheme("package");
+//    	this.registerReceiver(receiver, intentFilter);
     	undieReceiver = new UnDieReceiver();
 	}
 	Handler handler = new Handler(){
@@ -149,54 +148,54 @@ public class SDCardInstall extends Activity{
 		}
     }
 
-    public class InstalledReceiver extends BroadcastReceiver {
-    	
-
-    	@Override
-    	public void onReceive(Context arg0, Intent intent) {
-    		// TODO Auto-generated method stub
-    		if (intent.getAction().equals("android.intent.action.PACKAGE_ADDED")){
-    			Log.i("receiver", "接收到信息了");
-    			String packageName = intent.getDataString().substring(8);
-    			Log.i("receiver", packageName);
-    			File dirs = new File("/sdcard");
-    			File[] listFiles = dirs.listFiles();
-    			for (File file : listFiles) {
-    				if (file.getName().equals(packageName)&&file.isDirectory()){
-    					copyObb(file.getAbsolutePath(),packageName,"dir");
-    					Log.i("receiver", "开始拷贝了");
-    					break;
-    				}else if (file.getName().endsWith(".obb")&&file.getName().contains(packageName)){
-    					copyObb(file.getAbsolutePath(),packageName,"file");
-    					break;
-    				}
-    			}
-    		}
-    	}
-    	
-    	private void copyObb(String obbPath,String packName,String tag){
-    		File obb_dir = new File("/sdcard/Android/obb/"+packName);
-    		if (!obb_dir.exists()){
-    			obb_dir.mkdirs();
-    		}
-    		if (tag.equals("file")){
-    			util.copyFile(obbPath, obb_dir.getAbsolutePath()+File.separator+obbPath.split(File.separator)[-1]);
-    		}else {
-    			File dir_file = new File(obbPath);
-    			File[] listFiles = dir_file.listFiles();
-    			for (File file : listFiles) {
-    				Log.i("receiver", file.getAbsolutePath());
-    				Log.i("receiver", obb_dir.getAbsolutePath()+File.separator+"11111111111111111");
-    				util.copyFile(file.getAbsolutePath(), obb_dir.getAbsolutePath()+File.separator+file.getName());
-    			}
-    		}
-    	}
-
-    }
+//    public class InstalledReceiver extends BroadcastReceiver {
+//    	
+//
+//    	@Override
+//    	public void onReceive(Context arg0, Intent intent) {
+//    		// TODO Auto-generated method stub
+//    		if (intent.getAction().equals("android.intent.action.PACKAGE_ADDED")){
+//    			Log.i("receiver", "接收到信息了");
+//    			String packageName = intent.getDataString().substring(8);
+//    			Log.i("receiver", packageName);
+//    			File dirs = new File("/sdcard");
+//    			File[] listFiles = dirs.listFiles();
+//    			for (File file : listFiles) {
+//    				if (file.getName().equals(packageName)&&file.isDirectory()){
+//    					copyObb(file.getAbsolutePath(),packageName,"dir");
+//    					Log.i("receiver", "开始拷贝了");
+//    					break;
+//    				}else if (file.getName().endsWith(".obb")&&file.getName().contains(packageName)){
+//    					copyObb(file.getAbsolutePath(),packageName,"file");
+//    					break;
+//    				}
+//    			}
+//    		}
+//    	}
+//    	
+//    	private void copyObb(String obbPath,String packName,String tag){
+//    		File obb_dir = new File("/sdcard/Android/obb/"+packName);
+//    		if (!obb_dir.exists()){
+//    			obb_dir.mkdirs();
+//    		}
+//    		if (tag.equals("file")){
+//    			util.copyFile(obbPath, obb_dir.getAbsolutePath()+File.separator+obbPath.split(File.separator)[-1]);
+//    		}else {
+//    			File dir_file = new File(obbPath);
+//    			File[] listFiles = dir_file.listFiles();
+//    			for (File file : listFiles) {
+//    				Log.i("receiver", file.getAbsolutePath());
+//    				Log.i("receiver", obb_dir.getAbsolutePath()+File.separator+"11111111111111111");
+//    				util.copyFile(file.getAbsolutePath(), obb_dir.getAbsolutePath()+File.separator+file.getName());
+//    			}
+//    		}
+//    	}
+//
+//    }
     @Override
     protected void onDestroy() {
     	// TODO Auto-generated method stub
-    	unregisterReceiver(receiver);
+//    	unregisterReceiver(receiver);
     	unregisterReceiver(undieReceiver);
     	super.onDestroy();
     }

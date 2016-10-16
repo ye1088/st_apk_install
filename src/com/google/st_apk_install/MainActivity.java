@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipException;
 
+import com.google.UtilsPack.InstallFinishAskCopyObb;
+import com.google.st_apk_install.InstalledReceiver.IRInterface;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +20,9 @@ import android.os.Message;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -44,7 +50,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements IRInterface{
 	ListView apkList ;
 	ArrayList modTime;
 	ApkInfo apkInfo;
@@ -57,6 +63,8 @@ public class MainActivity extends Activity {
 	ProgressBar delay_bar;
 	InstalledReceiver receiver;
 	Button refresh_btn;
+	AlertDialog copy_obb_dialog;
+
 	
 	Handler handler = new Handler(){
 		public void handleMessage(Message msg) {
@@ -83,6 +91,11 @@ public class MainActivity extends Activity {
 				Toast.makeText(MainActivity.this, "所有安装包加载完成，之前没有找到的安装包，现在都出现了哦~", Toast.LENGTH_LONG).show();
 				refresh_btn.setEnabled(true);
 				break;
+			case 200:
+				copy_obb_dialog.dismiss();
+			case 201:
+				Toast.makeText(MainActivity.this, "数据包拷贝完成，可以打开游戏玩耍啦~~", Toast.LENGTH_LONG).show();
+				break;
 				
 			default:
 				break;
@@ -90,10 +103,12 @@ public class MainActivity extends Activity {
 			
 		};
 	};
+	private NotificationManager notificationManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		apkList = (ListView) findViewById(R.id.apklistbview);
 		real_modTime = new ArrayList<Long>();
 //        Intent intent = getIntent();
@@ -104,6 +119,7 @@ public class MainActivity extends Activity {
         if (is_service_awake){
         	onBackPressed();
         }
+       
         util = new Utils();
         //将手机内存中的所有apk等显示出来
         show_apklist();
@@ -170,6 +186,7 @@ public class MainActivity extends Activity {
     	intentFilter.addAction("android.intent.action.PACKAGE_ADDED");
     	intentFilter.addDataScheme("package");
     	this.registerReceiver(receiver, intentFilter);
+    	receiver.setIRInterfaceListener(this);
     	this.registerReceiver(new UnDieReceiver(), intentFilter);
     	
     	delay_bar = (ProgressBar) findViewById(R.id.delay);
@@ -184,51 +201,25 @@ public class MainActivity extends Activity {
     	
     }
     
-   
-    public class InstalledReceiver extends BroadcastReceiver {
-    	
-
-    	@Override
-    	public void onReceive(Context arg0, Intent intent) {
-    		// TODO Auto-generated method stub
-    		if (intent.getAction().equals("android.intent.action.PACKAGE_ADDED")){
-    			Log.i("receiver", "接收到信息了");
-    			String packageName = intent.getDataString().substring(8);
-    			Log.i("receiver", packageName);
-    			File dirs = new File("/sdcard");
-    			File[] listFiles = dirs.listFiles();
-    			for (File file : listFiles) {
-    				if (file.getName().equals(packageName)&&file.isDirectory()){
-    					copyObb(file.getAbsolutePath(),packageName,"dir");
-    					Log.i("receiver", "开始拷贝了");
-    					break;
-    				}else if (file.getName().endsWith(".obb")&&file.getName().contains(packageName)){
-    					copyObb(file.getAbsolutePath(),packageName,"file");
-    					break;
-    				}
-    			}
-    		}
-    	}
-    	
-    	private void copyObb(String obbPath,String packName,String tag){
-    		File obb_dir = new File("/sdcard/Android/obb/"+packName);
-    		if (!obb_dir.exists()){
-    			obb_dir.mkdirs();
-    		}
-    		if (tag.equals("file")){
-    			util.copyFile(obbPath, obb_dir.getAbsolutePath()+File.separator+obbPath.split(File.separator)[-1]);
-    		}else {
-    			File dir_file = new File(obbPath);
-    			File[] listFiles = dir_file.listFiles();
-    			for (File file : listFiles) {
-    				Log.i("receiver", file.getAbsolutePath());
-    				Log.i("receiver", obb_dir.getAbsolutePath()+File.separator+"11111111111111111");
-    				util.copyFile(file.getAbsolutePath(), obb_dir.getAbsolutePath()+File.separator+file.getName());
-    			}
-    		}
-    	}
-
-    }
+    public void copyObb(String obbPath,String packName,String tag){
+		File obb_dir = new File("/sdcard/Android/obb/"+packName);
+		if (!obb_dir.exists()){
+			obb_dir.mkdirs();
+		}
+		if (tag.equals("file")){
+			util.copyFile(obbPath, obb_dir.getAbsolutePath()+File.separator+obbPath.split(File.separator)[-1]);
+		}else {
+			File dir_file = new File(obbPath);
+			File[] listFiles = dir_file.listFiles();
+			for (File file : listFiles) {
+				Log.i("receiver", file.getAbsolutePath());
+				Log.i("receiver", obb_dir.getAbsolutePath()+File.separator+"11111111111111111");
+				util.copyFile(file.getAbsolutePath(), obb_dir.getAbsolutePath()+File.separator+file.getName());
+			}
+		}
+	}
+    
+  
     
     private void init() {
 		// TODO Auto-generated method stub
@@ -535,6 +526,80 @@ public boolean onKeyDown(int keyCode, KeyEvent event) {
 		return true;
 	}
 	return super.onKeyDown(keyCode, event);
+}
+
+
+
+
+
+
+
+
+
+
+@Override
+public void show_obb_dialog(final ArrayList<String> obb_path,
+		final ArrayList<String> leixing, final String packageName) {
+	// TODO Auto-generated method stub
+//	ArrayList<String> obb_path = start_intent.getStringArrayListExtra("obb_path");
+//	ArrayList<String> leixing = start_intent.getStringArrayListExtra("leixing");
+//	String packageName = start_intent.getStringExtra("packageName");
+	//(String[])obb_path.toArray()
+	showNotification("刚安装的软件可能有数据包", "安装器提示:", "可能有数据包，需要拷贝么？", 1, R.drawable.ic_launcher);
+	copy_obb_dialog = new AlertDialog.Builder(MainActivity.this).setTitle("发现该游戏存在数据包，请选择要拷贝的数据包")
+	.setItems(util.listTOArray(obb_path), new OnClickListener() {
+		
+		@Override
+		public void onClick(DialogInterface arg0, final int pos) {
+			// TODO Auto-generated method stub
+			new Thread(){
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					super.run();
+					Message msg = handler.obtainMessage();
+					msg.arg1 = 200;
+					handler.sendMessage(msg);
+					copyObb(obb_path.get(pos),packageName,leixing.get(pos));
+					msg = handler.obtainMessage();
+					msg.arg1 = 201;
+					handler.sendMessage(msg);
+					
+				}
+			}.start();
+			
+			
+		}
+	}).setNegativeButton("取消", null).show();
+	
+//	Toast.makeText(this, "该软件可能有数据包，请点开通知栏查看详情！", Toast.LENGTH_LONG).show();
+	
+
+//	Intent install_back = new Intent(MainActivity.this, InstallFinishAskCopyObb.class);
+//	install_back.putStringArrayListExtra("obb_path", obb_path);
+//	install_back.putStringArrayListExtra("leixing", leixing);
+//	install_back.putExtra("packageName", packageName);
+//	install_back.putExtra("is_install_back", true);
+//	install_back.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//	MainActivity.this.startActivity(install_back);
+}
+//显示系统通知
+private void showNotification(String tickerText,String contentTitle,String contentText,int id,int resId){  
+	  
+    Notification notification = new Notification(resId,tickerText,System.currentTimeMillis());  
+    notification.defaults = Notification.DEFAULT_SOUND;  
+    notification.flags = Notification.FLAG_AUTO_CANCEL;
+    PendingIntent contentIntent = PendingIntent.getActivity(this,0,getIntent(),0);  
+    notification.setLatestEventInfo(this,contentTitle,contentText,contentIntent);  
+    notificationManager.notify(id,notification);  
+
+}  
+
+@Override
+protected void onDestroy() {
+	// TODO Auto-generated method stub
+	unregisterReceiver(receiver);
+	super.onDestroy();
 }
     
 }

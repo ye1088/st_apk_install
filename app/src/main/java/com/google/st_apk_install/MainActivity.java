@@ -209,6 +209,8 @@ public class MainActivity extends Activity implements IRInterface {
 				jo.put("pack_name",tmp_apkInfo.pack_name);
 				apk_list_ja.put(jo);
 			}
+			File exist_dir = new File("/sdcard/st_unZip");
+			if (!exist_dir.exists()) exist_dir.mkdir();
 			BufferedWriter bw = new BufferedWriter(new FileWriter("/sdcard/st_unZip/apk_list.json"));
 			bw.write(apk_list_ja.toString());
 			bw.flush();

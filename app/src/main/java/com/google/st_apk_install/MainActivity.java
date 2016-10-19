@@ -1,7 +1,12 @@
 package com.google.st_apk_install;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -56,6 +61,10 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainActivity extends Activity implements IRInterface {
 	ListView apkList;
 	ArrayList modTime;
@@ -89,6 +98,7 @@ public class MainActivity extends Activity implements IRInterface {
 					apkList.setAdapter(adapter);
 
 					Toast.makeText(MainActivity.this, "大部分安装包加载完成，现在可有安装需要安装的软件啦~~", Toast.LENGTH_LONG).show();
+					save_apk_list();
 					break;
 				case 101:
 					//将文件的修改时间按从大到小的顺序排列
@@ -112,6 +122,9 @@ public class MainActivity extends Activity implements IRInterface {
 
 		;
 	};
+
+	
+
 	private NotificationManager notificationManager;
 	/**
 	 * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -181,6 +194,36 @@ public class MainActivity extends Activity implements IRInterface {
 		client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 	}
 
+	//将apk列表保存到本地文件中
+	private void save_apk_list() {
+		try {
+			JSONArray apk_list_ja = new JSONArray();
+			for (Object sub_real_modTime:real_modTime
+				 ) {
+				JSONObject jo = new JSONObject();
+				Long tmp_long_time = (long)sub_real_modTime;
+				jo.put("time",tmp_long_time);
+				ApkInfo tmp_apkInfo = (ApkInfo) real_apkMap.get(String.valueOf(tmp_long_time));
+				jo.put("apk_name",tmp_apkInfo.apk_name);
+				jo.put("apkPath",tmp_apkInfo.apkPath);
+				jo.put("pack_name",tmp_apkInfo.pack_name);
+				apk_list_ja.put(jo);
+			}
+			BufferedWriter bw = new BufferedWriter(new FileWriter("/sdcard/st_unZip/apk_list.json"));
+			bw.write(apk_list_ja.toString());
+			bw.flush();
+			bw.close();
+		} catch (JSONException e) {
+			Log.d("save_apk_list","jsonarray没有创建成功");
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+
+	}
 
 	//启动时初始化各项配置
 	@Override

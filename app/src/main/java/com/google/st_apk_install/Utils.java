@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -121,7 +122,22 @@ public class Utils {
 //            out.close();
 //        }
     }
-    
+
+
+	public String fileToString(String path){
+		Scanner scanner = null;
+		try {
+			scanner = new Scanner(new File(path));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		StringBuilder sb = new StringBuilder();
+		while (scanner.hasNext()){
+			sb.append(scanner.nextLine());
+		}
+
+		return sb.toString();
+	}
     
     protected boolean is_file_exist(String apkPath) {
 		// TODO Auto-generated method stub

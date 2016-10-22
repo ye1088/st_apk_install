@@ -93,12 +93,18 @@ public class MainActivity extends Activity implements IRInterface {
 					refresh_btn.setEnabled(false);
 					delay_bar.setVisibility(View.INVISIBLE);
 					//将文件的修改时间按从大到小的顺序排列
+					if (new File("/sdcard/st_unZip/apk_list.json").exists()){
+						adapter.setItemList(real_modTime, real_apkMap);
+						adapter.notifyDataSetChanged();
+					}else{
+						adapter = new ApkAdapter(MainActivity.this, real_modTime, real_apkMap);
 
-					adapter = new ApkAdapter(MainActivity.this, real_modTime, real_apkMap);
-					apkList.setAdapter(adapter);
+						apkList.setAdapter(adapter);
+					}
+
 
 					Toast.makeText(MainActivity.this, "大部分安装包加载完成，现在可有安装需要安装的软件啦~~", Toast.LENGTH_LONG).show();
-					save_apk_list();
+
 					break;
 				case 101:
 					//将文件的修改时间按从大到小的顺序排列
@@ -106,8 +112,11 @@ public class MainActivity extends Activity implements IRInterface {
 					adapter.setItemList(real_modTime, real_apkMap);
 					adapter.notifyDataSetChanged();
 					Toast.makeText(MainActivity.this, "所有安装包加载完成，之前没有找到的安装包，现在都出现了哦~", Toast.LENGTH_LONG).show();
+					save_apk_list();
 					refresh_btn.setEnabled(true);
 					break;
+
+
 				case 200:
 					copy_obb_dialog.dismiss();
 				case 201:
@@ -381,6 +390,10 @@ public class MainActivity extends Activity implements IRInterface {
 
 	private void show_apklist() {
 		// TODO Auto-generated method stub
+		if (new File("/sdcard/st_unZip/apk_list.json").exists()){
+			Log.d("show_mem_apklist","show_mem_apklist执行了");
+			show_mem_apklist();
+		}
 		new Thread() {
 			@Override
 			public void run() {
@@ -421,6 +434,40 @@ public class MainActivity extends Activity implements IRInterface {
 //
 //			}
 //		}.start();
+
+	}
+
+	private void show_mem_apklist() {
+		try {
+			Bitmap  bitmap = BitmapFactory.decodeResource(MainActivity.this.getResources(), R.drawable.ic_launcher);
+			JSONArray ja = new JSONArray(util.fileToString("/sdcard/st_unZip/apk_list.json"));
+			apkMap = new HashMap();
+			modTime = new ArrayList<Long>();
+			apkMap.clear();
+			modTime.clear();
+
+			for (int i = 0; i < ja.length(); i++) {
+				JSONObject jo = ja.getJSONObject(i);
+				String apkPath = jo.getString("apkPath");
+				if (!(new File(apkPath).exists())){
+					continue;
+				}
+				long time = jo.getLong("time");
+				String apk_name = jo.getString("apk_name");
+				String pack_name = jo.getString("pack_name");
+				modTime.add(time);
+				apkInfo = new ApkInfo(bitmap,apk_name,pack_name,time,apkPath);
+				apkMap.put(String.valueOf(time),apkInfo);
+			}
+			real_apkMap = util.copyOtherMap(apkMap, modTime, "ApkInfo");
+
+			real_modTime = util.copyOtherList(modTime, "Long");
+			adapter = new ApkAdapter(MainActivity.this, real_modTime, real_apkMap);
+
+			apkList.setAdapter(adapter);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -658,6 +705,7 @@ public class MainActivity extends Activity implements IRInterface {
 		builder.setSmallIcon(resId);
 		builder.setTicker(tickerText);
 		builder.setAutoCancel(true);
+		builder.setDefaults(Notification.DEFAULT_SOUND);
 		builder.setWhen(System.currentTimeMillis());
 //		Intent intent = this.getIntent();
 		PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, getIntent(), 0);

@@ -26,7 +26,7 @@ public class InstalledReceiver extends BroadcastReceiver {
 			leixing.clear();
 			receive_copyObb("/sdcard", packageName);
 			if (!obb_path.isEmpty()){
-				irinterface.show_obb_dialog(obb_path, leixing, packageName);
+//				irinterface.show_obb_dialog(obb_path, leixing, packageName);
 			}
 //			Intent install_back = new Intent(context, InstalledReceiver.class);
 //			install_back.putStringArrayListExtra("obb_path", obb_path);

@@ -8,8 +8,10 @@ import java.util.zip.ZipException;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -85,6 +87,30 @@ public class SDCardInstall extends Activity{
 					};
 				}.start();
 				
+			}else if(xapkPath.endsWith(".zip")){
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle("提示");
+				builder.setMessage("这可能是个安装包，请选择操作");
+				builder.setPositiveButton("安装", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						new Thread(){
+							public void run() {
+								xapk_install(xapkPath,SDCardInstall.this);
+								Message msg = handler.obtainMessage();
+								msg.arg1 = 1100;
+								handler.sendMessage(msg);
+							};
+						}.start();
+					}
+				});
+				builder.setNegativeButton("点错了", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						finish();
+					}
+				});
+				builder.show();
 			}else{
 				Toast.makeText(this, xapkPath+" ����һ����װ��", Toast.LENGTH_LONG).show();
 				onBackPressed();
@@ -96,14 +122,35 @@ public class SDCardInstall extends Activity{
 			}
 		}else{
 			final String tpk_path = intent.getStringExtra("tpk_path");
-			new Thread(){
-				public void run() {
-					xapk_install(tpk_path,SDCardInstall.this);
-					Message msg = handler.obtainMessage();
-					msg.arg1 = 1100;
-					handler.sendMessage(msg);
-				};
-			}.start();
+			if(tpk_path.endsWith(".zip")){
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle("提示");
+				builder.setMessage("这可能是个安装包，请选择操作");
+				builder.setPositiveButton("安装", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						new Thread(){
+							public void run() {
+								xapk_install(tpk_path,SDCardInstall.this);
+								Message msg = handler.obtainMessage();
+								msg.arg1 = 1100;
+								handler.sendMessage(msg);
+							};
+						}.start();
+					}
+				});
+			}else {
+				new Thread(){
+					public void run() {
+						xapk_install(tpk_path,SDCardInstall.this);
+						Message msg = handler.obtainMessage();
+						msg.arg1 = 1100;
+						handler.sendMessage(msg);
+
+					};
+				}.start();
+			}
+
 		}
 //		finish();
 	}
@@ -137,6 +184,10 @@ public class SDCardInstall extends Activity{
 			
 			util.copyObb(uZipDir.getAbsolutePath(),obb_dir_exist.getAbsolutePath());
 			util.install_apk(apkPath_obb,context);
+			util.deletFile(apkPath);
+
+//			util.deletFile("/sdcard/st_unZip/"+unZipDir);
+
 			
 			
 		} catch (ZipException e) {

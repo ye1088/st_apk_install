@@ -46,6 +46,27 @@ public class Utils {
 		return result;
 		
 	}
+
+
+	public void deletFile(String path){
+		File file = new File(path);
+		if (file.exists()){
+			if (file.isDirectory()){
+				File[] files = file.listFiles();
+				for (File tmp:files
+					 ) {
+					if (tmp.isDirectory()){
+						deletFile(file.getAbsolutePath());
+					}
+				}
+				file.delete();
+
+			}else {
+				file.delete();
+			}
+		}
+
+	}
 	
 	 /**
      * ��ѹ��һ���ļ�
@@ -269,7 +290,7 @@ public class Utils {
     	intent.setDataAndType(Uri.fromFile(new File(apkPath)), "application/vnd.android.package-archive");
     	
     	context.startActivity(intent);
-		
+
 	}
     
     public void copyFile(String srcPath, String dstPath){

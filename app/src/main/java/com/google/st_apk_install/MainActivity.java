@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipException;
 
@@ -50,8 +51,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.RequiresApi;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
@@ -80,7 +83,12 @@ public class MainActivity extends Activity implements IRInterface {
 	Button refresh_btn;
 	AlertDialog copy_obb_dialog;
 	SharedPreferences settings;
-
+	//view_pager
+	ViewPager view_pager ;
+	View apk_list_view,file_list_view;
+	LayoutInflater inflater;
+	List<View> view_list; //每个页卡的页面
+	List title_list;//页卡名字
 
 	Handler handler = new Handler() {
 		public void handleMessage(Message msg) {
@@ -145,8 +153,9 @@ public class MainActivity extends Activity implements IRInterface {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		view_pager_init();
 		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		apkList = (ListView) findViewById(R.id.apklistbview);
+		apkList = (ListView) apk_list_view.findViewById(R.id.apklistbview);
 		real_modTime = new ArrayList<Long>();
 //        Intent intent = getIntent();
 //        Uri data = intent.getData();
@@ -236,12 +245,32 @@ public class MainActivity extends Activity implements IRInterface {
 
 	}
 
+	private void view_pager_init(){
+
+		inflater = getLayoutInflater();
+		view_pager = (ViewPager) findViewById(R.id.viewpager);
+
+		apk_list_view = inflater.inflate(R.layout.apk_list,null);
+		file_list_view = inflater.inflate(R.layout.file_list,null);
+
+		view_list = new ArrayList<View>();// 将要分页显示的View装入数组中
+		view_list.add(apk_list_view);
+		view_list.add(file_list_view);
+
+		title_list = new ArrayList<String>();// 每个页面的Title数据
+		title_list.add("安装包模式");
+		title_list.add("文件浏览模式");
+
+		MyPagerAdapter pagerAdapter = new MyPagerAdapter(view_list, title_list);
+		view_pager.setAdapter(pagerAdapter);
+	}
 	//启动时初始化各项配置
 	@Override
 	protected void onStart() {
 		// TODO Auto-generated method stub
 		super.onStart();// ATTENTION: This was auto-generated to implement the App Indexing API.
 // See https://g.co/AppIndexing/AndroidStudio for more information.
+//		view_pager_init();
 		client.connect();
 		settings = getSharedPreferences("Config.xml",MODE_PRIVATE);
 		boolean isResgisterReceiver = settings.getBoolean("isResgisterReceiver",false);
@@ -404,7 +433,7 @@ public class MainActivity extends Activity implements IRInterface {
 				apkMap.clear();
 				modTime.clear();
 				list_file("/sdcard", true, false);
-				list_file("/storage", true, true);
+//				list_file("/storage", true, true);
 				real_apkMap = util.copyOtherMap(apkMap, modTime, "ApkInfo");
 
 				real_modTime = util.copyOtherList(modTime, "Long");
@@ -417,7 +446,7 @@ public class MainActivity extends Activity implements IRInterface {
 				apkMap.clear();
 				modTime.clear();
 				list_file_al_package("/sdcard", true, false);
-				list_file_al_package("/storage", true, true);
+//				list_file_al_package("/storage", true, true);
 				real_apkMap = util.copyOtherMap(apkMap, modTime, "ApkInfo");
 
 				real_modTime = util.copyOtherList(modTime, "Long");
@@ -488,7 +517,7 @@ public class MainActivity extends Activity implements IRInterface {
 						if (file.getName().endsWith(".apk")) {
 							getApkInfo(file);
 						} else if (file.getName().endsWith(".xapk") || file.getName().endsWith(".dpk")
-								|| file.getName().endsWith(".xpk") || file.getName().endsWith(".tpk")) {
+								|| file.getName().endsWith(".xpk") || file.getName().endsWith(".tpk")|| file.getName().endsWith(".zip")) {
 							getZipIndo(file);
 						}
 					}
@@ -515,7 +544,7 @@ public class MainActivity extends Activity implements IRInterface {
 						if (file.getName().endsWith(".apk")) {
 							getApkInfo(file);
 						} else if (file.getName().endsWith(".xapk") || file.getName().endsWith(".dpk")
-								|| file.getName().endsWith(".xpk") || file.getName().endsWith(".tpk")) {
+								|| file.getName().endsWith(".xpk") || file.getName().endsWith(".tpk") || file.getName().endsWith(".tpk")) {
 							getZipIndo(file);
 						}
 					}

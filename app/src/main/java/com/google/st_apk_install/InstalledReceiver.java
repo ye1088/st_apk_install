@@ -13,11 +13,13 @@ import android.util.Log;
 public class InstalledReceiver extends BroadcastReceiver {
 	
 	private IRInterface irinterface;
+	Utils util;
 	ArrayList obb_path = new ArrayList<String>();
 	ArrayList leixing = new ArrayList<String>();
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		// TODO Auto-generated method stub
+		util = new Utils();
 		if (intent.getAction().equals("android.intent.action.PACKAGE_ADDED")){
 			Log.i("receiver", "���յ���Ϣ��");
 			final String packageName = intent.getDataString().substring(8);
@@ -25,6 +27,7 @@ public class InstalledReceiver extends BroadcastReceiver {
 			obb_path.clear();
 			leixing.clear();
 			receive_copyObb("/sdcard", packageName);
+
 			if (!obb_path.isEmpty()){
 //				irinterface.show_obb_dialog(obb_path, leixing, packageName);
 			}

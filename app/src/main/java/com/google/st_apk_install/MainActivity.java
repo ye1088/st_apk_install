@@ -87,8 +87,10 @@ public class MainActivity extends Activity implements IRInterface {
 	ViewPager view_pager ;
 	View apk_list_view,file_list_view;
 	LayoutInflater inflater;
+	ListView fileListView;
 	List<View> view_list; //每个页卡的页面
 	List title_list;//页卡名字
+	List filePathList;//文件列表
 
 	Handler handler = new Handler() {
 		public void handleMessage(Message msg) {
@@ -148,6 +150,126 @@ public class MainActivity extends Activity implements IRInterface {
 	 * See https://g.co/AppIndexing/AndroidStudio for more information.
 	 */
 	private GoogleApiClient client;
+	public void install_apk_tpk(String apkPath){
+		if (util.is_file_exist(apkPath)) {
+
+			if (apkPath.endsWith(".apk")) {
+				util.install_apk(apkPath, MainActivity.this);
+			} else if (apkPath.endsWith(".xapk") || apkPath.endsWith(".xpk")
+					|| apkPath.endsWith(".dpk") || apkPath.endsWith(".tpk") || apkPath.endsWith(".zip")) {
+
+//						new Thread(){
+//							public void run() {
+//								xapk_install(apkPath,MainActivity.this);
+//
+//							};
+//						}.start();
+				Intent intent = new Intent(MainActivity.this, SDCardInstall.class);
+				intent.putExtra("is_main_intall", true);
+				intent.putExtra("tpk_path", apkPath);
+				if (apkPath.endsWith(".zip")) {
+					intent.putExtra("is_zip", true);
+				}
+				startActivity(intent);
+			}
+		} else {
+			util.show_dialog_tip("错误", "访问的安装包不存在！！请刷新安装包列表！~", "确定", MainActivity.this);
+		}
+	}
+
+	public void clickListener(){
+
+		//设置安装包点击事件
+		apkList.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int pos,
+									long arg3) {
+				// TODO Auto-generated method stub
+				Log.i("List_Length", pos + " " + real_modTime.size());
+				String apk_name = ((ApkInfo) real_apkMap.get(String.valueOf(real_modTime.get(pos)))).apk_name;
+				final String apkPath = ((ApkInfo) real_apkMap.get(String.valueOf(real_modTime.get(pos)))).apkPath;
+				install_apk_tpk(apkPath);
+
+			}
+
+
+		});
+
+		//安装包长按事件
+		apkList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view,  int position, long id) {
+				final String apkPath = ((ApkInfo) real_apkMap.get(String.valueOf(real_modTime.get(position)))).apkPath;
+				new AlertDialog.Builder(MainActivity.this).setTitle("请选择操作").setItems(new String[]{"删除","安装"},new DialogInterface.OnClickListener(){
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						switch (which){
+							case 0:
+								new File(apkPath).delete();
+								break;
+							case 1:
+								install_apk_tpk(apkPath);
+								break;
+						}
+					}
+				}).create().show();
+				return true;
+			}
+		});
+
+		filePathList = new ArrayList();
+		settings = getSharedPreferences("Config.xml",MODE_PRIVATE);
+		String file_list_path = settings.getString("file_list_path", "/sdcard");
+		filePathList = getFilePathList(filePathList,file_list_path);
+
+		final FileAdapter fileAdapter = new FileAdapter(MainActivity.this, filePathList);
+		fileListView.setAdapter(fileAdapter);
+
+		fileListView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				File file = new File((String) filePathList.get(position));
+				if (file.isDirectory()){
+					Editor edit = settings.edit();
+					edit.putString("file_list_path",file.getAbsolutePath());
+					edit.commit();
+
+					filePathList = getFilePathList(filePathList,file.getAbsolutePath());
+					fileAdapter.setItemList(filePathList);
+					fileAdapter.notifyDataSetChanged();
+				}else {
+					install_apk_tpk(file.getAbsolutePath());
+				}
+			}
+		});
+
+	}
+
+	private List getFilePathList(List filePathList,String file_list_path) {
+		filePathList.clear();
+		File file = new File(file_list_path);
+		if (file.isDirectory()){
+			if (file.getAbsolutePath().equals("/")){
+				filePathList.add("/");
+			}else {
+				filePathList.add(file.getParent());
+
+			}
+			File[] list = file.listFiles();
+			for (File sub_file:list
+					) {
+				if (sub_file.isDirectory())
+					filePathList.add(sub_file.getAbsolutePath());
+				else if (sub_file.getAbsolutePath().endsWith(".xapk") || sub_file.getAbsolutePath().endsWith(".xpk")|| sub_file.getAbsolutePath().endsWith(".apk")
+						|| sub_file.getAbsolutePath().endsWith(".dpk") || sub_file.getAbsolutePath().endsWith(".tpk") || sub_file.getAbsolutePath().endsWith(".zip")){
+					filePathList.add(sub_file.getAbsolutePath());
+				}
+			}
+		}
+		return filePathList;
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -169,44 +291,7 @@ public class MainActivity extends Activity implements IRInterface {
 		util = new Utils();
 		//将手机内存中的所有apk等显示出来
 		show_apklist();
-		apkList.setOnItemClickListener(new OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int pos,
-									long arg3) {
-				// TODO Auto-generated method stub
-				Log.i("List_Length", pos + " " + real_modTime.size());
-				String apk_name = ((ApkInfo) real_apkMap.get(String.valueOf(real_modTime.get(pos)))).apk_name;
-				final String apkPath = ((ApkInfo) real_apkMap.get(String.valueOf(real_modTime.get(pos)))).apkPath;
-				if (util.is_file_exist(apkPath)) {
-
-					if (apkPath.endsWith(".apk")) {
-						util.install_apk(apkPath, MainActivity.this);
-					} else if (apkPath.endsWith(".xapk") || apkPath.endsWith(".xpk")
-							|| apkPath.endsWith(".dpk") || apkPath.endsWith(".tpk") || apkPath.endsWith(".zip")) {
-
-//						new Thread(){
-//							public void run() {
-//								xapk_install(apkPath,MainActivity.this);
-//
-//							};
-//						}.start();
-						Intent intent = new Intent(MainActivity.this, SDCardInstall.class);
-						intent.putExtra("is_main_intall", true);
-						intent.putExtra("tpk_path", apkPath);
-						if (apkPath.endsWith(".zip")) {
-							intent.putExtra("is_zip", true);
-						}
-						startActivity(intent);
-					}
-				} else {
-					util.show_dialog_tip("错误", "访问的安装包不存在！！请刷新安装包列表！~", "确定", MainActivity.this);
-				}
-
-			}
-
-
-		});
+		clickListener();
 		// ATTENTION: This was auto-generated to implement the App Indexing API.
 		// See https://g.co/AppIndexing/AndroidStudio for more information.
 		client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -263,6 +348,7 @@ public class MainActivity extends Activity implements IRInterface {
 
 		MyPagerAdapter pagerAdapter = new MyPagerAdapter(view_list, title_list);
 		view_pager.setAdapter(pagerAdapter);
+		fileListView = (ListView) file_list_view.findViewById(R.id.file_list_view);
 	}
 	//启动时初始化各项配置
 	@Override
